@@ -3233,6 +3233,17 @@ blockquote {
     transform: translateY(16px);
   }
 }
+.onboard-intro-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.onboard-demo {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+}
 .preset-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

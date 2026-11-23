@@ -7,6 +7,7 @@ import { buzz } from '../lib/haptics';
 import { uid } from '../lib/ids';
 import { OATH } from '../lib/mantras';
 import { OBSESSION_COLORS, PRESETS, type Preset } from '../lib/presets';
+import { loadSampleData } from '../lib/sample';
 
 interface Pick {
   key: string;
@@ -60,6 +61,14 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     }, 2000);
   };
 
+  /** Skip setup and land in a populated app (sample data is removable in Settings). */
+  const demo = async () => {
+    setSealed(true);
+    await loadSampleData();
+    await saveProfile({ name: '', onboardedAt: Date.now() - 26 * 86_400_000 });
+    onDone();
+  };
+
   const next = () => {
     buzz(8);
     setStep((s) => s + 1);
@@ -92,9 +101,14 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             <p className="fade-2">Not talent. Not luck.</p>
             <h1 className="fade-3">They got obsessed.</h1>
           </div>
-          <button className="btn btn--primary btn--block btn--huge fade-4" onClick={next}>
-            Begin
-          </button>
+          <div className="onboard-intro-foot fade-4">
+            <button className="btn btn--primary btn--block btn--huge" onClick={next}>
+              Begin
+            </button>
+            <button className="link-btn onboard-demo" onClick={demo} disabled={sealed}>
+              Just looking? Explore with sample data
+            </button>
+          </div>
         </div>
       )}
 

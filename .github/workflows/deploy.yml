@@ -1,5 +1,6 @@
 # Builds the app and publishes it to GitHub Pages.
 # One-time setup: repo Settings → Pages → Source: "GitHub Actions".
+# Then run it from the Actions tab ("Run workflow"); pushes to main also deploy.
 name: Deploy to GitHub Pages
 
 on:

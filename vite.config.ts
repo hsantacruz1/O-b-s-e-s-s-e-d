@@ -16,13 +16,13 @@ export default defineConfig({
       manifest: {
         name: 'OBSESSED.',
         short_name: 'OBSESSED',
-        description: 'Become obsessed. Stay obsessed. Track the work, chase the vision.',
+        description: 'Become obsessed. Stay obsessed. A quiet place to practice your craft, every day.',
         start_url: './',
         scope: './',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#0B0B0C',
-        theme_color: '#0B0B0C',
+        background_color: '#F3F2EF',
+        theme_color: '#F3F2EF',
         categories: ['productivity', 'lifestyle', 'health & fitness'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

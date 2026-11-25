@@ -10,7 +10,8 @@ export interface MetricDef {
 export interface Obsession {
   id: string;
   name: string;
-  emoji: string;
+  icon?: string; // key into ICONS (line icons)
+  emoji?: string; // legacy (v1): replaced by `icon`
   color: string;
   why: string;
   dailyTargetMin: number; // 0 = no daily target

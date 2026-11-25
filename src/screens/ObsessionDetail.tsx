@@ -1,4 +1,4 @@
-import { ChevronLeft, Pencil, Play, Plus } from 'lucide-react';
+import { ChevronLeft, Pencil, Plus } from 'lucide-react';
 import { useMemo } from 'react';
 import { Empty, SectionHead, Stat } from '../components/Bits';
 import { EntryCard } from '../components/EntryCard';
@@ -6,6 +6,7 @@ import { Bar, Heatmap, LineChart } from '../components/Viz';
 import { formatDuration, formatHours } from '../lib/dates';
 import { MASTERY_MILESTONES, masteryProgress } from '../lib/game';
 import { useEntries, useObsession, useToday } from '../lib/hooks';
+import { ObsessionIcon } from '../lib/icons';
 import { goBack, navigate } from '../lib/router';
 import { bestStreak, currentStreak, daySet, metricSeries, minutesByDay, personalBest, totalMinutes } from '../lib/stats';
 import { ui } from '../lib/ui';
@@ -20,7 +21,7 @@ export function ObsessionDetail({ id }: { id: string }) {
   if (o === null) {
     return (
       <div className="screen">
-        <Empty emoji="🕳️" title="Obsession not found" action={<button className="btn btn--primary" onClick={() => navigate('/', { replace: true })}>Home</button>} />
+        <Empty title="This obsession no longer exists" action={<button className="btn btn--primary" onClick={() => navigate('/', { replace: true })}>Home</button>} />
       </div>
     );
   }
@@ -37,41 +38,43 @@ export function ObsessionDetail({ id }: { id: string }) {
       <div className="obsession-glow" />
       <header className="topbar topbar--clear">
         <button className="icon-btn" onClick={() => goBack('/')} aria-label="Back">
-          <ChevronLeft size={24} />
+          <ChevronLeft size={24} strokeWidth={1.3} />
         </button>
         <button className="icon-btn" onClick={() => ui.openObsessionForm(o.id)} aria-label="Edit obsession">
-          <Pencil size={18} />
+          <Pencil size={17} strokeWidth={1.3} />
         </button>
       </header>
 
       <section className="obsession-hero">
-        <div className="obsession-emoji">{o.emoji}</div>
-        <h1 className="display">{o.name.toUpperCase()}</h1>
-        {o.why && <blockquote className="obsession-why">“{o.why}”</blockquote>}
+        <div className="obsession-icon">
+          <ObsessionIcon o={o} size={26} strokeWidth={1.1} />
+        </div>
+        <h1 className="display">{o.name}</h1>
+        {o.why && <blockquote className="obsession-why">{o.why}</blockquote>}
         <div className="row gap center-row">
-          <button className="btn btn--primary" onClick={() => navigate(`/lockin?o=${o.id}`)}>
-            <Play size={16} fill="currentColor" /> Lock in
+          <button className="btn btn--primary" onClick={() => navigate(`/focus?o=${o.id}`)}>
+            Begin a session
           </button>
           <button className="btn btn--ghost" onClick={() => ui.openLog({ obsessionId: o.id })}>
-            <Plus size={16} /> Log
+            <Plus size={15} strokeWidth={1.5} /> Entry
           </button>
         </div>
       </section>
 
       <div className="stat-grid">
-        <Stat value={formatHours(minutes)} label="Hours" accent={o.color} />
-        <Stat value={entries.length} label="Reps" />
-        <Stat value={streak.length} label="Streak" />
-        <Stat value={bestStreak(days)} label="Best streak" />
+        <Stat value={formatHours(minutes)} label="Hours" />
+        <Stat value={entries.length} label="Sessions" />
+        <Stat value={streak.length} label="Current streak" />
+        <Stat value={bestStreak(days)} label="Longest streak" />
       </div>
 
-      <SectionHead title="Path to mastery" />
+      <SectionHead title="The path to mastery" />
       <div className="card mastery-card">
         <div className="mastery-big">
           <b>{formatHours(minutes)}</b>
-          <span>of {m.next.toLocaleString()} hours · next milestone</span>
+          <span>of {m.next.toLocaleString()} hours, the next milestone</span>
         </div>
-        <Bar value={m.progress} color={o.color} tall />
+        <Bar value={m.progress} color="var(--oc-ink)" />
         <div className="milestones">
           {MASTERY_MILESTONES.map((ms) => (
             <span key={ms} className={m.hours >= ms ? 'is-hit' : ms === m.next ? 'is-next' : ''}>
@@ -80,19 +83,17 @@ export function ObsessionDetail({ id }: { id: string }) {
           ))}
         </div>
         <p className="muted small">
-          {(m.toMastery * 100).toFixed(2)}% of 10,000 hours. {o.dailyTargetMin ? `At ${formatDuration(o.dailyTargetMin)} a day, your next milestone is ${Math.ceil(((m.next - m.hours) * 60) / o.dailyTargetMin)} days out.` : ''}
+          {(m.toMastery * 100).toFixed(2)}% of ten thousand hours. {o.dailyTargetMin ? `At ${formatDuration(o.dailyTargetMin)} a day, the next milestone is ${Math.ceil(((m.next - m.hours) * 60) / o.dailyTargetMin)} days away.` : ''}
         </p>
       </div>
 
-      <SectionHead title="Grind map" />
-      <div className="card">
-        <Heatmap minutes={heat} weeks={18} color={o.color} />
-        {avgIntensity > 0 && <p className="muted small">Average focus: {avgIntensity.toFixed(1)} / 5 🔥</p>}
-      </div>
+      <SectionHead title="Practice calendar" />
+      <Heatmap minutes={heat} weeks={18} color="var(--oc-ink)" />
+      {avgIntensity > 0 && <p className="muted small pad-x">Average depth of focus: {avgIntensity.toFixed(1)} of 5</p>}
 
-      <SectionHead title="The numbers" action={<button className="link-btn" onClick={() => ui.openObsessionForm(o.id)}>Manage</button>} />
+      <SectionHead title="Measurements" action={<button className="link-btn" onClick={() => ui.openObsessionForm(o.id)}>Manage</button>} />
       {o.metrics.length === 0 ? (
-        <div className="card muted small">Track numbers like weight lifted, songs finished or words written. Add them when you log, or tap Manage.</div>
+        <p className="muted small pad-x">Track what matters: weight lifted, songs finished, words written. Add a measurement when you record an entry, or tap Manage.</p>
       ) : (
         <div className="metric-cards">
           {o.metrics.map((md) => {
@@ -112,21 +113,21 @@ export function ObsessionDetail({ id }: { id: string }) {
                 <div className="metric-card-head">
                   <span>{md.name}</span>
                   {pb && (
-                    <span className="tag tag--gold">
-                      {isCount ? 'Best session' : 'PR'} {fmt(pb.value)} {md.unit}
+                    <span className="tag tag--accent">
+                      {isCount ? 'Best session' : 'Personal best'} {fmt(pb.value)} {md.unit}
                     </span>
                   )}
                 </div>
                 {isCount && series.length > 0 && (
                   <div className="metric-total">
-                    <b style={{ color: o.color }}>{fmt(running)}</b> {md.unit} total
+                    <b>{fmt(running)}</b> {md.unit} in total
                   </div>
                 )}
                 {series.length === 0 ? (
-                  <p className="muted small">No data yet. Add a value next time you log.</p>
+                  <p className="muted small">Nothing recorded yet. Add a value with your next entry.</p>
                 ) : (
                   <>
-                    <LineChart points={chart} color={o.color} unit={md.unit} bestIndex={bestIndex} />
+                    <LineChart points={chart} color="var(--oc-ink)" unit={md.unit} bestIndex={bestIndex} />
                     {series.length > 1 && (
                       <p className="muted small">
                         {isCount
@@ -142,9 +143,9 @@ export function ObsessionDetail({ id }: { id: string }) {
         </div>
       )}
 
-      <SectionHead title="Tape" />
+      <SectionHead title="Journal" />
       {entries.length === 0 ? (
-        <Empty emoji="🎞️" title="No reps yet" body="Lock in or log your first session." />
+        <Empty title="No sessions yet" body="Begin a focus session or record your first entry." />
       ) : (
         <div className="entry-list">
           {entries.slice(0, 20).map((e) => (

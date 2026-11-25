@@ -10,17 +10,17 @@ const NOTES: Record<string, string[]> = {
     'Finished the hook. Bridge still needs work.',
     'Recorded 3 takes of verse 2. The third one was it.',
     'Mixing session. Vocals finally sit right in the beat.',
-    'Wrote 16 bars on the train. Rough, but the flow is there.',
+    'Wrote sixteen bars on the train. Rough, but the flow is there.',
     'Studied the arrangement of a classic record for an hour. Stole two ideas.',
-    'Beat from scratch. Drums hit different today.',
+    'Beat from scratch. The drums finally felt right.',
   ],
   Fitness: [
     'Push day. Bench felt heavy but it moved.',
-    'Legs. Squat up 10 lbs. Walked out like a newborn deer.',
+    'Legs. Squat up 10 lbs. Slow, controlled, honest reps.',
     '5 miles, negative splits.',
     'Pull day + core. Grip is getting stronger.',
     'Active recovery. Mobility and a long walk.',
-    'Hit a PR on bench and screamed a little.',
+    'New personal best on bench. Quiet satisfaction.',
   ],
 };
 
@@ -30,12 +30,12 @@ const SAMPLE_PREFIX = 'sample-';
 export async function loadSampleData(): Promise<number> {
   let obsessions = await db.obsessions.filter((o) => !o.archived).toArray();
   if (obsessions.length === 0) {
-    const make = (name: string, emoji: string, color: string, order: number, metrics: Obsession['metrics']): Obsession => ({
-      id: uid(), name, emoji, color, why: '', dailyTargetMin: 60, metrics, createdAt: Date.now(), archived: false, order,
+    const make = (name: string, icon: string, color: string, order: number, why: string, metrics: Obsession['metrics']): Obsession => ({
+      id: uid(), name, icon, color, why, dailyTargetMin: 60, metrics, createdAt: Date.now(), archived: false, order,
     });
     obsessions = [
-      make('Music', '🎤', '#FF3347', 1, [{ id: uid(), name: 'Songs written', unit: 'songs', kind: 'count' }]),
-      make('Fitness', '🏋️', '#FF7A1A', 2, [{ id: uid(), name: 'Bench press', unit: 'lbs' }]),
+      make('Music', 'mic', '#A86B57', 1, 'To make music that outlives me.', [{ id: uid(), name: 'Songs written', unit: 'songs', kind: 'count' }]),
+      make('Fitness', 'dumbbell', '#4F6475', 2, 'My body is the instrument. I am building it.', [{ id: uid(), name: 'Bench press', unit: 'lbs' }]),
     ];
     await db.obsessions.bulkAdd(obsessions);
   }
@@ -57,7 +57,7 @@ export async function loadSampleData(): Promise<number> {
       d.setHours(idx === 0 ? 19 + Math.floor(Math.random() * 4) : 6 + Math.floor(Math.random() * 3), Math.floor(Math.random() * 60));
       const durationMin = [25, 30, 45, 45, 60, 60, 75, 90, 120][Math.floor(Math.random() * 9)];
       const intensity = 2 + Math.floor(Math.random() * 4);
-      const pool = NOTES[o.name] ?? ['Put the work in. Small progress, still progress.', 'Rough start, strong finish.', 'Locked in for real today.'];
+      const pool = NOTES[o.name] ?? ['Small progress is still progress.', 'A slow start, then the work took over.', 'Deep focus today. Time disappeared.'];
       const note = Math.random() < 0.6 ? pool[Math.floor(Math.random() * pool.length)] : '';
       const metrics = o.metrics.slice(0, 1).flatMap((m) => {
         if (Math.random() < 0.45) return [];

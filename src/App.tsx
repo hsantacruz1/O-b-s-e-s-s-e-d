@@ -6,14 +6,14 @@ import { requestPersistence } from './lib/db';
 import { useProfile } from './lib/hooks';
 import { navigate, useRoute } from './lib/router';
 import { BoardEditor } from './screens/BoardEditor';
-import { LockIn } from './screens/LockIn';
+import { Focus } from './screens/Focus';
+import { Journal } from './screens/Journal';
 import { LogSheet } from './screens/LogSheet';
 import { ObsessionDetail } from './screens/ObsessionDetail';
 import { ObsessionForm } from './screens/ObsessionForm';
 import { Onboarding } from './screens/Onboarding';
 import { Progress } from './screens/Progress';
 import { Settings } from './screens/Settings';
-import { Tape } from './screens/Tape';
 import { Today } from './screens/Today';
 import { Vision } from './screens/Vision';
 
@@ -44,9 +44,10 @@ export function App() {
       screen = <Today />;
       tab = '/';
       break;
+    case 'journal':
     case 'tape':
-      screen = <Tape />;
-      tab = '/tape';
+      screen = <Journal />;
+      tab = '/journal';
       break;
     case 'vision':
       if (parts[1]) screen = <BoardEditor key={parts[1]} id={parts[1]} />;
@@ -62,8 +63,9 @@ export function App() {
     case 'o':
       screen = <ObsessionDetail key={parts[1]} id={parts[1]} />;
       break;
+    case 'focus':
     case 'lockin':
-      screen = <LockIn />;
+      screen = <Focus />;
       break;
     case 'settings':
       screen = <Settings />;

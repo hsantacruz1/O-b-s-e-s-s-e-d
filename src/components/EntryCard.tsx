@@ -1,40 +1,38 @@
-import { Lock, Pencil } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { db } from '../lib/db';
 import { formatDayHeading, formatDuration, formatTime } from '../lib/dates';
 import { INTENSITY_LABELS } from '../lib/game';
+import { ObsessionIcon } from '../lib/icons';
 import { useBackToClose } from '../lib/router';
 import { ui, useUI } from '../lib/ui';
 import type { Entry, Obsession } from '../lib/types';
 import { Photo } from './Bits';
 import { Sheet } from './Sheet';
-import { Intensity } from './Viz';
+import { FocusDots } from './Viz';
 
-export function EntryCard({ entry, obsession, compact }: { entry: Entry; obsession?: Obsession; compact?: boolean }) {
-  const color = obsession?.color ?? '#888';
+export function EntryCard({ entry, obsession }: { entry: Entry; obsession?: Obsession }) {
   const shown = entry.photoIds.slice(0, 3);
   const extra = entry.photoIds.length - shown.length;
   return (
-    <button className={`entry ${compact ? 'entry--compact' : ''}`} onClick={() => ui.openEntry(entry.id)} style={{ ['--oc' as string]: color }}>
+    <button className="entry" onClick={() => ui.openEntry(entry.id)} style={{ ['--oc' as string]: obsession?.color ?? '#86817A' }}>
       <div className="entry-top">
         <span className="entry-obsession">
-          <span className="entry-emoji">{obsession?.emoji ?? '•'}</span>
+          <span className="dot" />
           {obsession?.name ?? 'Archived'}
+          {entry.lockIn && <em> · focus session</em>}
         </span>
-        <span className="entry-time">
-          {entry.lockIn && <Lock size={11} />}
-          {formatTime(entry.createdAt)}
-        </span>
+        <span className="entry-time">{formatTime(entry.createdAt)}</span>
       </div>
       <div className="entry-main">
         {entry.durationMin > 0 && <span className="entry-duration">{formatDuration(entry.durationMin)}</span>}
-        <Intensity value={entry.intensity} />
-        <span className="entry-xp">+{entry.xp} XP</span>
+        <FocusDots value={entry.intensity} />
+        <span className="entry-xp">+{entry.xp}</span>
       </div>
-      {entry.note && !compact && <p className="entry-note">{entry.note}</p>}
-      {shown.length > 0 && !compact && (
+      {entry.note && <p className="entry-note">{entry.note}</p>}
+      {shown.length > 0 && (
         <div className={`entry-photos entry-photos--${shown.length}`}>
           {shown.map((id, i) => (
             <div key={id} className="entry-photo">
@@ -44,7 +42,7 @@ export function EntryCard({ entry, obsession, compact }: { entry: Entry; obsessi
           ))}
         </div>
       )}
-      {entry.metrics.length > 0 && !compact && (
+      {entry.metrics.length > 0 && (
         <div className="entry-metrics">
           {entry.metrics.map((m) => {
             const def = obsession?.metrics.find((d) => d.id === m.metricId);
@@ -61,7 +59,7 @@ export function EntryCard({ entry, obsession, compact }: { entry: Entry; obsessi
   );
 }
 
-/** Full view of one rep, opened from anywhere. */
+/** Full view of one entry, opened from anywhere. */
 export function EntryDetailSheet() {
   const { entry: state } = useUI();
   const entry = useLiveQuery(async () => (state.id ? (await db.entries.get(state.id)) ?? null : null), [state.id]);
@@ -76,9 +74,10 @@ export function EntryDetailSheet() {
         eyebrow={entry ? `${formatDayHeading(entry.date)} · ${formatTime(entry.createdAt)}` : ''}
         title={
           entry ? (
-            <>
-              {obsession?.emoji} {obsession?.name ?? 'Rep'}
-            </>
+            <span className="title-with-icon" style={{ ['--oc' as string]: obsession?.color }}>
+              <ObsessionIcon o={obsession} size={22} />
+              {obsession?.name ?? 'Entry'}
+            </span>
           ) : (
             ''
           )
@@ -86,32 +85,28 @@ export function EntryDetailSheet() {
         footer={
           entry && (
             <button className="btn btn--ghost btn--block" onClick={() => ui.openLog({ entryId: entry.id })}>
-              <Pencil size={16} /> Edit
+              <Pencil size={15} strokeWidth={1.5} /> Edit entry
             </button>
           )
         }
       >
         {entry && (
           <div className="entry-detail">
-            <div className="entry-detail-stats">
+            <div className="facts">
               <div>
                 <b>{entry.durationMin ? formatDuration(entry.durationMin) : '—'}</b>
-                <span>Time</span>
+                <span>Duration</span>
+              </div>
+              <div>
+                <b>{entry.intensity ? INTENSITY_LABELS[entry.intensity] : '—'}</b>
+                <span>Focus</span>
               </div>
               <div>
                 <b>+{entry.xp}</b>
-                <span>XP</span>
-              </div>
-              <div>
-                <b>{entry.intensity ? <Intensity value={entry.intensity} size={14} /> : '—'}</b>
-                <span>{INTENSITY_LABELS[entry.intensity] || 'Intensity'}</span>
+                <span>Experience</span>
               </div>
             </div>
-            {entry.lockIn && (
-              <div className="tag">
-                <Lock size={12} /> Logged in Lock In mode
-              </div>
-            )}
+            {entry.lockIn && <p className="label">Recorded in a focus session</p>}
             {entry.note && <p className="entry-detail-note">{entry.note}</p>}
             {entry.metrics.length > 0 && (
               <div className="entry-metrics">

@@ -42,6 +42,7 @@ export function BoardItemContent({ item, full }: { item: BoardItem; full?: boole
         fontStyle: f.italic ? 'italic' : 'normal',
         textTransform: f.upper ? 'uppercase' : 'none',
         lineHeight: f.line,
+        letterSpacing: `${f.tracking}em`,
         fontSize: cq(item.size),
         color: item.color,
       }}
@@ -53,7 +54,7 @@ export function BoardItemContent({ item, full }: { item: BoardItem; full?: boole
 
 /** Read-only render of a board. Scales to whatever width it's given. */
 export function BoardView({ board, full, className = '' }: { board: Board; full?: boolean; className?: string }) {
-  const bg = BOARD_BG_MAP.get(board.background) ?? BOARD_BG_MAP.get('ink')!;
+  const bg = BOARD_BG_MAP.get(board.background) ?? BOARD_BG_MAP.get('bone')!;
   const ratio = board.aspect === '9:19.5' ? '9 / 19.5' : board.aspect === '4:5' ? '4 / 5' : '1 / 1';
   return (
     <div className={`board ${className}`} style={{ aspectRatio: ratio, background: bg.css }}>

@@ -14,14 +14,15 @@ export const ASPECTS: { value: BoardAspect; label: string; hint: string }[] = [
   { value: '1:1', label: 'Square', hint: 'Grid' },
 ];
 
-export const FONT_FOR: Record<TextStyle, { family: string; weight: number; italic?: boolean; upper?: boolean; line: number }> = {
-  display: { family: 'Anton', weight: 400, upper: true, line: 1.02 },
-  serif: { family: '"Playfair Display"', weight: 500, italic: true, line: 1.1 },
-  script: { family: 'Caveat', weight: 700, line: 1.05 },
-  sans: { family: '"Inter Variable", Inter', weight: 800, line: 1.1 },
+export const FONT_FOR: Record<TextStyle, { family: string; weight: number; italic?: boolean; upper?: boolean; line: number; tracking: number }> = {
+  display: { family: '"Cormorant Garamond"', weight: 400, line: 1.04, tracking: -0.01 },
+  serif: { family: '"Cormorant Garamond"', weight: 400, italic: true, line: 1.08, tracking: 0 },
+  sans: { family: '"Jost Variable", Jost', weight: 500, upper: true, line: 1.3, tracking: 0.28 },
+  script: { family: '"Jost Variable", Jost', weight: 300, line: 1.2, tracking: 0.02 },
 };
 
-export const TEXT_STYLE_LABELS: Record<TextStyle, string> = { display: 'Poster', serif: 'Editorial', script: 'Handwritten', sans: 'Clean' };
+export const TEXT_STYLE_ORDER: TextStyle[] = ['display', 'serif', 'sans', 'script'];
+export const TEXT_STYLE_LABELS: Record<TextStyle, string> = { display: 'Classic', serif: 'Italic', sans: 'Gallery', script: 'Light' };
 
 /* ───────────── Seeded randomness so "shuffle" gives new layouts ───────────── */
 
@@ -162,7 +163,7 @@ export function newImageItem(board: Board, photoId: string, aspectRatio: number,
 export function newTextItem(board: Board, text: string, style: TextStyle, color: string): BoardTextItem {
   const H = boardHeight(board.aspect);
   const maxZ = board.items.reduce((m, i) => Math.max(m, i.z), 0);
-  const size = style === 'display' ? 0.13 : style === 'script' ? 0.11 : 0.085;
+  const size = style === 'display' ? 0.12 : style === 'serif' ? 0.1 : style === 'sans' ? 0.042 : 0.07;
   return { id: uid(), type: 'text', text, style, color, bg: null, x: 0.08, y: H * 0.42, w: 0.84, h: size * 1.4, size, r: 0, z: maxZ + 1 };
 }
 
@@ -200,7 +201,7 @@ export async function renderBoard(board: Board, width = 1170): Promise<Blob> {
   canvas.width = W;
   canvas.height = Math.round(W * H);
   const ctx = canvas.getContext('2d')!;
-  const bg = BOARD_BG_MAP.get(board.background) ?? BOARD_BG_MAP.get('ink')!;
+  const bg = BOARD_BG_MAP.get(board.background) ?? BOARD_BG_MAP.get('bone')!;
 
   if (bg.stops.length === 1) {
     ctx.fillStyle = bg.stops[0][1];
@@ -237,10 +238,10 @@ export async function renderBoard(board: Board, width = 1170): Promise<Blob> {
       let iw = w;
       let ih = h;
       if (item.frame === 'polaroid') {
-        ctx.shadowColor = 'rgba(0,0,0,0.35)';
-        ctx.shadowBlur = W * 0.025;
-        ctx.shadowOffsetY = W * 0.008;
-        ctx.fillStyle = '#F7F4EE';
+        ctx.shadowColor = 'rgba(20,18,15,0.18)';
+        ctx.shadowBlur = W * 0.03;
+        ctx.shadowOffsetY = W * 0.01;
+        ctx.fillStyle = '#FBFAF8';
         ctx.fillRect(-w / 2, -h / 2, w, h);
         ctx.shadowColor = 'transparent';
         const pad = w * 0.055;
@@ -269,6 +270,8 @@ export async function renderBoard(board: Board, width = 1170): Promise<Blob> {
       const f = FONT_FOR[item.style];
       const size = item.size * W;
       ctx.font = `${f.italic ? 'italic ' : ''}${f.weight} ${size}px ${f.family}`;
+      // Tracking, where the browser's canvas supports it.
+      if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${f.tracking * size}px`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const text = f.upper ? item.text.toUpperCase() : item.text;

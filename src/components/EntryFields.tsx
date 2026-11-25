@@ -17,19 +17,19 @@ export interface EntryFieldValues {
 }
 
 const NOTE_PROMPTS = [
-  'What did you work on? What clicked? What’s next?',
-  'What would the best version of you do differently tomorrow?',
-  'One thing you learned. One thing you’ll fix.',
-  'Where did it feel easy? Where did it fight back?',
+  'What did you work on? What clicked? What comes next?',
+  'What would your best self do differently tomorrow?',
+  'One thing you learned. One thing you will refine.',
+  'Where did it flow? Where did it resist?',
 ];
 
 export function IntensityPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="field">
       <label className="field-label">
-        How locked in? <span className="field-hint">{INTENSITY_LABELS[value] || 'Tap to rate'}</span>
+        Depth of focus <span className="field-hint">{INTENSITY_LABELS[value] || 'Tap to rate'}</span>
       </label>
-      <div className="intensity-picker">
+      <div className="focus-scale">
         {[1, 2, 3, 4, 5].map((i) => (
           <button
             key={i}
@@ -37,13 +37,11 @@ export function IntensityPicker({ value, onChange }: { value: number; onChange: 
             className={i <= value ? 'on' : ''}
             aria-label={`${i} — ${INTENSITY_LABELS[i]}`}
             onClick={() => {
-              buzz(i * 6);
+              buzz(4 + i * 2);
               onChange(i === value ? 0 : i);
             }}
           >
-            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
-              <path d="M12 2c.5 3.2 2.4 5 4.2 7 1.6 1.8 2.8 3.7 2.8 6.3A7 7 0 0 1 12 22a7 7 0 0 1-7-6.7c0-2.3 1-4 2.4-5.4.3 1.7 1.2 2.8 2.4 3.3-.6-3.9.6-8 2.2-11.2Z" />
-            </svg>
+            <i style={{ width: 6 + i * 3, height: 6 + i * 3 }} />
           </button>
         ))}
       </div>
@@ -56,18 +54,18 @@ export function PhotoPicker({ ids, onChange, onAdded }: { ids: string[]; onChang
   const [busy, setBusy] = useState(false);
   return (
     <div className="field">
-      <label className="field-label">Receipts <span className="field-hint">Progress pics, the studio, the sheet music</span></label>
+      <label className="field-label">Photographs <span className="field-hint">Progress, the studio, the page</span></label>
       <div className="photo-picker">
         {ids.map((id) => (
           <div className="photo-picker-item" key={id}>
             <Photo id={id} />
             <button type="button" aria-label="Remove photo" onClick={() => onChange(ids.filter((x) => x !== id))}>
-              <X size={14} />
+              <X size={13} strokeWidth={1.6} />
             </button>
           </div>
         ))}
         <button type="button" className="photo-picker-add" onClick={() => input.current?.click()} disabled={busy}>
-          {busy ? <span className="spinner" /> : <Camera size={22} />}
+          {busy ? <span className="spinner" /> : <Camera size={20} strokeWidth={1.3} />}
           <span>{busy ? 'Saving' : 'Add'}</span>
         </button>
       </div>
@@ -123,7 +121,7 @@ export function EntryFields({
       <IntensityPicker value={value.intensity} onChange={(intensity) => onChange({ ...value, intensity })} />
 
       <div className="field">
-        <label className="field-label" htmlFor="entry-note">Notes</label>
+        <label className="field-label" htmlFor="entry-note">Reflection</label>
         <textarea
           id="entry-note"
           className="input textarea"
@@ -138,7 +136,7 @@ export function EntryFields({
 
       {obsession && (
         <div className="field">
-          <label className="field-label">Numbers <span className="field-hint">Optional. Track what matters.</span></label>
+          <label className="field-label">Measurements <span className="field-hint">Optional</span></label>
           <div className="metric-inputs">
             {obsession.metrics.map((m) => (
               <label className="metric-input" key={m.id}>
@@ -176,7 +174,7 @@ export function EntryFields({
             </div>
           ) : (
             <button type="button" className="link-btn" onClick={() => setAdding(true)}>
-              <Plus size={16} /> Track a new number
+              <Plus size={15} strokeWidth={1.5} /> Track something new
             </button>
           )}
         </div>

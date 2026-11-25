@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { SectionHead, Wordmark } from '../components/Bits';
+import { SectionHead, Segmented, Wordmark } from '../components/Bits';
 import { exportBackup, importBackup, storageEstimate, wipeEverything } from '../lib/backup';
 import { db, saveProfile } from '../lib/db';
 import { toast } from '../lib/events';
@@ -9,6 +9,8 @@ import { useObsessions, useProfileOrDefault } from '../lib/hooks';
 import { OATH } from '../lib/mantras';
 import { goBack } from '../lib/router';
 import { hasSampleData, loadSampleData, removeSampleData } from '../lib/sample';
+import { ObsessionIcon } from '../lib/icons';
+import { setTheme, useThemePref } from '../lib/theme';
 import { ui } from '../lib/ui';
 
 export function Settings() {
@@ -19,6 +21,7 @@ export function Settings() {
   const [usage, setUsage] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const importInput = useRef<HTMLInputElement>(null);
+  const theme = useThemePref();
   const sample = useLiveQuery(hasSampleData, []);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -62,7 +65,7 @@ export function Settings() {
     setBusy('import');
     try {
       const r = await importBackup(file);
-      toast(`Restored ${r.entries} reps and ${r.photos} photos`);
+      toast(`Restored ${r.entries} entries and ${r.photos} photographs`);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Import failed', 'error');
     } finally {
@@ -71,7 +74,7 @@ export function Settings() {
   };
 
   const wipe = async () => {
-    const ok = await ui.confirm({ title: 'Erase everything?', body: 'All obsessions, reps, photos and boards are deleted from this device. Export a backup first if you want to keep them.', confirmLabel: 'Erase all', danger: true });
+    const ok = await ui.confirm({ title: 'Erase everything?', body: 'All obsessions, entries, photographs and boards are deleted from this device. Export a backup first if you want to keep them.', confirmLabel: 'Erase all', danger: true });
     if (!ok) return;
     await wipeEverything();
     window.location.hash = '/';
@@ -82,7 +85,7 @@ export function Settings() {
     <div className="screen settings">
       <header className="topbar">
         <button className="icon-btn" onClick={() => goBack('/')} aria-label="Back">
-          <ChevronLeft size={24} />
+          <ChevronLeft size={24} strokeWidth={1.3} />
         </button>
         <h2 className="topbar-title">Settings</h2>
         <span style={{ width: 40 }} />
@@ -94,32 +97,45 @@ export function Settings() {
         <input id="name" className="input" value={name} placeholder="What do they call you?" onChange={(e) => setName(e.target.value)} onBlur={() => saveProfile({ name: name.trim() })} />
       </div>
 
-      <SectionHead title="Obsessions" action={<button className="link-btn" onClick={() => ui.openObsessionForm()}><Plus size={15} /> Add</button>} />
+      <SectionHead title="Appearance" />
+      <Segmented
+        value={theme}
+        onChange={setTheme}
+        options={[
+          { value: 'system', label: 'Automatic' },
+          { value: 'light', label: 'Marble' },
+          { value: 'dark', label: 'Nero' },
+        ]}
+      />
+
+      <SectionHead title="Obsessions" action={<button className="link-btn" onClick={() => ui.openObsessionForm()}><Plus size={14} strokeWidth={1.5} /> Add</button>} />
       <div className="list">
         {obsessions.map((o, i) => (
           <div key={o.id} className={`list-row ${o.archived ? 'is-muted' : ''}`}>
             <button className="list-row-main" onClick={() => ui.openObsessionForm(o.id)}>
-              <span className="list-emoji" style={{ background: `${o.color}22`, color: o.color }}>{o.emoji}</span>
+              <span className="list-icon" style={{ ['--oc' as string]: o.color }}>
+                <ObsessionIcon o={o} size={17} />
+              </span>
               <span>
                 {o.name}
                 {o.archived && <em> · archived</em>}
               </span>
             </button>
-            <button className="icon-btn" onClick={() => move(o.id, -1)} disabled={i === 0} aria-label="Move up"><ArrowUp size={16} /></button>
-            <button className="icon-btn" onClick={() => move(o.id, 1)} disabled={i === obsessions.length - 1} aria-label="Move down"><ArrowDown size={16} /></button>
+            <button className="icon-btn" onClick={() => move(o.id, -1)} disabled={i === 0} aria-label="Move up"><ArrowUp size={15} strokeWidth={1.4} /></button>
+            <button className="icon-btn" onClick={() => move(o.id, 1)} disabled={i === obsessions.length - 1} aria-label="Move down"><ArrowDown size={15} strokeWidth={1.4} /></button>
           </div>
         ))}
       </div>
 
       <SectionHead title="Your mantras" />
       <div className="card">
-        <p className="muted small">Your own words show up in the daily mantra rotation, twice as often as ours.</p>
+        <p className="muted small">Your own words join the daily mantras, and appear twice as often.</p>
         <div className="mantra-list">
           {profile.customMantras.map((m, i) => (
             <div key={i} className="mantra-item">
               <span>“{m}”</span>
               <button className="icon-btn" aria-label="Remove mantra" onClick={() => saveProfile({ customMantras: profile.customMantras.filter((_, j) => j !== i) })}>
-                <X size={16} />
+                <X size={15} strokeWidth={1.4} />
               </button>
             </div>
           ))}
@@ -141,19 +157,19 @@ export function Settings() {
 
       {!isStandalone && (
         <>
-          <SectionHead title="Put it on your home screen" />
+          <SectionHead title="Add to your home screen" />
           <div className="card install">
             {isIOS ? (
               <ol>
                 <li>Tap the <b>Share</b> button in Safari.</li>
                 <li>Choose <b>Add to Home Screen</b>.</li>
-                <li>Open OBSESSED from your home screen. Full screen, works offline.</li>
+                <li>Open OBSESSED from your home screen. It runs full screen, and offline.</li>
               </ol>
             ) : (
               <ol>
                 <li>Open the browser menu <b>⋮</b>.</li>
                 <li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li>
-                <li>Launch it like any other app. Works offline.</li>
+                <li>Open it like any other app. It works offline.</li>
               </ol>
             )}
           </div>
@@ -163,22 +179,22 @@ export function Settings() {
       <SectionHead title="Your data" />
       <div className="list">
         <button className="list-row" onClick={doExport} disabled={!!busy}>
-          <span>{busy === 'export' ? 'Packing it up…' : 'Export backup'}</span>
-          <ChevronRight size={16} />
+          <span>{busy === 'export' ? 'Preparing…' : 'Export backup'}</span>
+          <ChevronRight size={15} strokeWidth={1.3} />
         </button>
         <button className="list-row" onClick={() => importInput.current?.click()} disabled={!!busy}>
           <span>{busy === 'import' ? 'Restoring…' : 'Restore from backup'}</span>
-          <ChevronRight size={16} />
+          <ChevronRight size={15} strokeWidth={1.3} />
         </button>
         {sample ? (
-          <button className="list-row" onClick={async () => toast(`Removed ${await removeSampleData()} sample reps`)}>
+          <button className="list-row" onClick={async () => toast(`Removed ${await removeSampleData()} sample entries`)}>
             <span>Remove sample data</span>
-            <ChevronRight size={16} />
+            <ChevronRight size={15} strokeWidth={1.3} />
           </button>
         ) : (
-          <button className="list-row" onClick={async () => toast(`Added ${await loadSampleData()} sample reps`)}>
+          <button className="list-row" onClick={async () => toast(`Added ${await loadSampleData()} sample entries`)}>
             <span>Load sample data (to explore)</span>
-            <ChevronRight size={16} />
+            <ChevronRight size={15} strokeWidth={1.3} />
           </button>
         )}
         <button className="list-row list-row--danger" onClick={wipe}>
@@ -186,7 +202,7 @@ export function Settings() {
         </button>
       </div>
       <p className="muted small pad-x">
-        Everything lives on this device only: no account, no cloud, nobody watching. Export a backup now and then. {usage && `Using ${usage}.`}
+        Everything stays on this device. No account, no cloud, no one watching. Export a backup from time to time. {usage && `Using ${usage}.`}
       </p>
       <input
         ref={importInput}
@@ -201,7 +217,7 @@ export function Settings() {
       />
 
       <div className="about">
-        <Wordmark size={28} />
+        <Wordmark size={15} />
         <p>Become obsessed. Stay obsessed.</p>
         <span>v{__APP_VERSION__}</span>
       </div>

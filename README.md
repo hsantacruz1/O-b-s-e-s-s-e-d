@@ -2,7 +2,7 @@
 
 **Become obsessed. Stay obsessed.**
 
-Jordan, Kobe, MJ, Em: different crafts, same trait. They got obsessed. OBSESSED. is a phone app for getting that way about your own craft, whether that's music, fitness, business, or anything else, and then staying that way. Track the work, keep the receipts, chase the vision.
+Jordan, Kobe, MJ, Em: different crafts, same trait. They became obsessed. OBSESSED. is a phone app for becoming that way about your own craft, whether music, fitness, business or anything else, and then staying that way. It is a quiet place to practice: record the work, keep a journal, and hold the vision in front of you.
 
 It's an installable web app (PWA). You add it to your home screen from the browser and it runs full screen and offline, like a native app, on iPhone and Android. No App Store, no account. Your data stays on your phone.
 
@@ -12,37 +12,41 @@ It's an installable web app (PWA). You add it to your home screen from the brows
 
 | | |
 |---|---|
-| **Today** | Your rank and XP, today's mantra, a progress ring for each obsession against its daily commitment, a streak warning if today isn't logged yet, the week at a glance, and your pinned vision board. |
-| **Lock In** | Full-screen focus timer. Pick an obsession and a goal (25 min to 2 h, or open-ended) and go. The screen stays awake, and the timer keeps running if you close the app or lock your phone. When you finish, rate how locked in you were, add notes and photos, and it's logged. |
-| **Log a rep** | Log any kind of work: a timed session, a note, progress photos, or numbers (bench press, songs written, words, miles). Each field is optional. |
-| **The Tape** | Your history, grouped by day. Filter by obsession, or switch to a photo wall of every progress pic. |
-| **Vision** | Mood board / vision board builder. Add photos, then drag, pinch to resize, and rotate. Add words in four fonts. One tap lays everything out as a **Collage**, **Grid** or **Polaroid scatter**, and tapping again shuffles it. **Export a full-resolution phone wallpaper** so you see it every time you pick up your phone. |
-| **Progress** | Total hours, current and best streak, an 18-week heatmap ("the grind map"), hours per week, the **path to 10,000 hours** for each obsession, a trophy case, and the rank ladder. |
-| **Obsession pages** | Your *why*, mastery milestones, a heatmap, and charts for every number you track. Personal records are marked, and counts like "songs written" show as running totals. |
+| **Today** | The date and a greeting, your level, today's mantra, a thin progress ring for each obsession against its daily commitment, a gentle note when your streak continues with one session today, the week at a glance, and your pinned vision board. |
+| **Focus** | A full-screen session over a quiet mountain horizon. A soft circle breathes behind the timer: four and a half seconds in, four and a half out. Pick an obsession and a duration (25 minutes to 2 hours, or open) and begin. The screen stays awake, and the timer keeps running if you close the app or lock your phone. When you finish, rate your depth of focus, write a reflection, add photographs, and it's recorded. |
+| **New entry** | Record any kind of work: a timed session, a reflection, photographs, or measurements (bench press, songs written, words, miles). Each field is optional. |
+| **Journal** | Your history, grouped by day and set like a printed journal. Filter by obsession, or switch to a wall of every photograph. |
+| **Vision** | Mood board and vision board builder. Add images, then drag, pinch to resize, and rotate. Add words in four styles (Classic, Italic, Gallery, Light). One tap arranges everything as a **Mosaic**, **Gallery** grid or scattered **Prints**, and tapping again offers a new arrangement. **Export a full-resolution phone wallpaper** so you see it every time you reach for your phone. |
+| **The Ascent** | Your level shown as a marble staircase, one step per rank, with a point marking where you stand. Total hours, current and longest streak, an 18-week practice calendar, hours per week, the **path to ten thousand hours** for each obsession, milestones, and the ranks. |
+| **Obsession pages** | Your *why*, mastery milestones, a practice calendar, and charts for everything you measure. Personal bests are marked, and counts like "songs written" show as running totals. |
 
-### The game layer (small, on purpose)
+### The quiet game layer
 
-- **XP** for every rep: 10 for showing up, 1 per minute worked, and bonuses for photos, reflections, numbers and full focus. Streaks add up to **+50%**.
-- **Ranks** at set levels: Rookie → Grinder → Student of the Game → Craftsman → Pro → All-Star → MVP → Legend → **GOAT**. Reaching GOAT takes about a year of real daily work.
-- **19 achievements**, including First Rep, On Fire (7-day streak), Possessed (30), 5AM Club, Night Shift, Locked In (a 60-minute session), Tunnel Vision (3 hours), New PR, Visionary, and Year of the Grind.
+- **Experience** for every session: 10 for presence, 1 per minute of practice, and a little more for photographs, reflections, measurements and deep focus. Consistency adds up to **+50%**.
+- **Ranks**, climbed like stairs: Initiate → Apprentice → Student → Practitioner → Artisan → Adept → Master → Virtuoso → **Legend**. Reaching Legend takes about a year of real daily work.
+- **19 milestones**, drawn as thin medallions in bronze, silver and gold: First Step, One Week, Devotion (30 days), Unbroken (100 days), First Light, Night Watch, Deep Work, The Long Session, Personal Best, The Visionary, A Year of Practice, and more.
 - **Mantras**: a new one every day in the house voice, plus a few from legends. Add your own and they come up twice as often.
 
 ---
 
-## The brand
+## The design
+
+The feeling to aim for: a deep breath on a mountain, climbing a marble staircase step by step, a quiet modern room with almost nothing in it.
 
 | | |
 |---|---|
-| **Name** | OBSESSED. (the red period is part of the mark) |
+| **Name** | OBSESSED, set in widely spaced serif capitals. |
 | **Tagline** | Become obsessed. Stay obsessed. |
-| **Oath** | *I'm not interested. I'm obsessed.* You hold a button to commit to it during onboarding. |
-| **Voice** | Short, direct, a little intense. A coach who believes in you and won't accept excuses. Sample lines: "Nobody's coming to save you. Lock in." "They'll call it talent. You'll know it was reps." |
-| **Ink** `#0B0B0C` | The background: a gym at 5 AM, the studio at 2 AM. |
-| **Bone** `#F4F1EA` | Warm white for type. |
-| **Obsession Red** `#FF3347` | Action and intensity. |
-| **Ember** `#FF7A1A` → **Trophy Gold** `#F7C548` | Streaks, XP and wins. |
-| **Type** | **Anton** for poster-loud headlines and numbers, **Inter** for everything you read. |
-| **Icon** | A thick gradient "O" (red to ember to gold) with a bone dot: the ring you close every day. |
+| **Oath** | *I'm not interested. I'm obsessed.* You press and hold a thin circle, one long inhale, to commit to it during onboarding. |
+| **Voice** | Calm, certain, unhurried. A mentor rather than a hype man. Sample lines: "One step, then the next. The staircase takes care of itself." "Mastery is a quiet conversation, repeated every day." |
+| **Marble** `#F3F2EF` / **Nero** `#121211` | Day and night grounds. The app follows your phone's light or dark setting, or you can choose in Settings. |
+| **Ink** `#1C1B19` | Charcoal type and primary buttons. |
+| **Stone** `#858079` | Secondary text and hairlines. |
+| **Brass** `#8C7650` | The single accent: progress, the current step, a new milestone. |
+| **Obsession tones** | Muted mineral colors: clay, brass, sage, moss, mist, slate, dusk, graphite. |
+| **Type** | **Cormorant Garamond** for headlines, numbers and reflections. **Jost** for labels, set small with wide tracking. |
+| **Structure** | Hairline rules in place of boxes, generous space, line icons and no emoji, slow fades and no bounce. |
+| **Icon** | A thin ring holding three ascending steps that lead to a point of brass. |
 
 ---
 
@@ -60,7 +64,7 @@ npm install
 npm run dev        # prints a Network URL like http://192.168.1.20:5173. Open it on your phone.
 ```
 
-In-app, **Settings → Load sample data** fills in a few weeks of reps so you can see every screen populated. Remove it with one tap.
+On the first screen, **Just looking? Explore with sample data** (or later, **Settings → Load sample data**) fills in a few weeks of sessions so you can see every screen populated. Remove it with one tap in Settings.
 
 ## Deploy (free, GitHub Pages)
 
@@ -82,10 +86,10 @@ npm run icons       # re-render PNG app icons from public/favicon.svg
 
 ```
 src/
-  lib/          data (db, types), game rules (XP, ranks, achievements), stats, board layout + export, router
+  lib/          data (db, types), game rules (experience, ranks, milestones), stats, board layout + export, theme, icons, router
   components/   sheets, charts, rings, entry cards, celebrations
-  screens/      Today, Tape, Vision + BoardEditor, Progress, ObsessionDetail, LockIn, Settings, Onboarding
-  styles/       the whole design system in one stylesheet
+  screens/      Today, Journal, Vision + BoardEditor, Progress, ObsessionDetail, Focus, Settings, Onboarding
+  styles/       the whole design system in one stylesheet (Marble and Nero themes)
 ```
 
 ## Your data
@@ -94,8 +98,8 @@ Everything is stored locally on your device in IndexedDB. Photos are compressed 
 
 ## Roadmap ideas
 
-- Native wrapper (Capacitor) for the App Store / Play Store, with **daily reminder notifications** ("Your streak ends in 3 hours")
+- Native wrapper (Capacitor) for the App Store / Play Store, with **daily reminder notifications** ("A quiet hour for music, whenever you are ready")
 - Optional cloud sync across devices
-- Shareable "streak cards" for Instagram stories
+- Shareable streak cards for Instagram stories, in the same editorial style
 - Weekly review: what you did, what improved, what's next
 - Sessions linked to vision board goals

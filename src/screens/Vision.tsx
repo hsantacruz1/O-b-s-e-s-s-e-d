@@ -1,4 +1,4 @@
-import { Pin, Plus } from 'lucide-react';
+import { Image, Pin, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Empty, Segmented } from '../components/Bits';
 import { BoardView } from '../components/BoardView';
@@ -26,36 +26,37 @@ export function Vision() {
   return (
     <div className="screen">
       <header className="screen-head">
-        <h1 className="display">VISION</h1>
-        <p>See it before you live it. Make it your lock screen.</p>
+        <h1 className="display">Vision</h1>
+        <p>See it clearly before you live it.</p>
       </header>
 
       {boards && boards.length === 0 ? (
         <Empty
-          emoji="🖼️"
-          title="No boards yet"
-          body="Collect photos of the stage, the body, the house, the plaque. Arrange them. Look at them every day."
+          icon={<Image size={26} strokeWidth={1.1} />}
+          title="An empty wall"
+          body="Gather images of the stage, the body, the home, the life. Arrange them with care, and return to them every day."
           action={
             <button className="btn btn--primary" onClick={() => setCreating(true)}>
-              <Plus size={18} /> New vision board
+              <Plus size={16} strokeWidth={1.5} /> New vision board
             </button>
           }
         />
       ) : (
         <div className="board-grid">
           <button className="board-card board-card--new" onClick={() => setCreating(true)}>
-            <Plus size={28} />
+            <Plus size={22} strokeWidth={1.1} />
             <span>New board</span>
           </button>
           {boards?.map((b) => (
             <button key={b.id} className="board-card" onClick={() => navigate(`/vision/${b.id}`)}>
-              <div className="board-card-art">
+              <div className="board-card-art mat">
                 <BoardView board={b} />
               </div>
               <div className="board-card-title">
-                {b.pinned && <Pin size={12} />} {b.title}
+                {b.title}
+                {b.pinned && <Pin size={11} strokeWidth={1.5} />}
               </div>
-              <div className="board-card-meta">{b.items.filter((i) => i.type === 'image').length} photos</div>
+              <div className="board-card-meta">{b.items.filter((i) => i.type === 'image').length} images</div>
             </button>
           ))}
         </div>
@@ -69,13 +70,13 @@ export function Vision() {
 function NewBoardSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [aspect, setAspect] = useState<BoardAspect>('9:19.5');
-  const [bg, setBg] = useState('ink');
+  const [bg, setBg] = useState('bone');
 
   useEffect(() => {
     if (open) {
       setTitle('');
       setAspect('9:19.5');
-      setBg('ink');
+      setBg('bone');
     }
   }, [open]);
 
@@ -84,7 +85,7 @@ function NewBoardSheet({ open, onClose }: { open: boolean; onClose: () => void }
     const count = await db.boards.count();
     await db.boards.add({
       id,
-      title: title.trim() || 'My Vision',
+      title: title.trim() || 'The Vision',
       aspect,
       background: bg,
       items: [],
@@ -97,10 +98,10 @@ function NewBoardSheet({ open, onClose }: { open: boolean; onClose: () => void }
   };
 
   return (
-    <Sheet open={open} onClose={onClose} eyebrow="New" title="VISION BOARD" footer={<button className="btn btn--primary btn--block btn--big" onClick={create}>Create &amp; add photos</button>}>
+    <Sheet open={open} onClose={onClose} eyebrow="New" title="Vision board" footer={<button className="btn btn--primary btn--block btn--big" onClick={create}>Create and add images</button>}>
       <div className="field">
         <label className="field-label" htmlFor="board-title">Name it</label>
-        <input id="board-title" className="input" placeholder="My Vision" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input id="board-title" className="input" placeholder="The Vision" value={title} onChange={(e) => setTitle(e.target.value)} />
         <div className="chip-row">
           {BOARD_TEMPLATES.map((t) => (
             <button key={t} className={`chip ${title === t ? 'is-on' : ''}`} onClick={() => setTitle(t)}>
@@ -122,7 +123,7 @@ function NewBoardSheet({ open, onClose }: { open: boolean; onClose: () => void }
         <div className="swatches">
           {BOARD_BACKGROUNDS.map((b) => (
             <button key={b.id} className={`swatch swatch--lg ${bg === b.id ? 'is-on' : ''}`} style={{ background: b.css }} onClick={() => setBg(b.id)} aria-label={b.label}>
-              <span>{b.label}</span>
+              <span style={{ color: b.ink }}>{b.label}</span>
             </button>
           ))}
         </div>

@@ -25,7 +25,7 @@ import { Empty, Segmented } from '../components/Bits';
 import { BoardItemContent, BoardView, itemStyle } from '../components/BoardView';
 import { Sheet } from '../components/Sheet';
 import { evaluateAchievements } from '../lib/actions';
-import { ASPECTS, TEXT_STYLE_LABELS, autoLayout, boardHeight, newImageItem, newTextItem, renderBoard, type LayoutKind } from '../lib/board';
+import { ASPECTS, TEXT_STYLE_LABELS, TEXT_STYLE_ORDER, autoLayout, boardHeight, newImageItem, newTextItem, renderBoard, type LayoutKind } from '../lib/board';
 import { db } from '../lib/db';
 import { toast } from '../lib/events';
 import { buzz } from '../lib/haptics';
@@ -138,14 +138,14 @@ export function BoardEditor({ id }: { id: string }) {
   if (stored === null) {
     return (
       <div className="screen">
-        <Empty emoji="🕳️" title="Board not found" action={<button className="btn btn--primary" onClick={() => navigate('/vision', { replace: true })}>Back to boards</button>} />
+        <Empty title="This board no longer exists" action={<button className="btn btn--primary" onClick={() => navigate('/vision', { replace: true })}>Back to boards</button>} />
       </div>
     );
   }
   if (!board) return <div className="screen" />;
 
   const H = boardHeight(board.aspect);
-  const bg = BOARD_BG_MAP.get(board.background) ?? BOARD_BG_MAP.get('ink')!;
+  const bg = BOARD_BG_MAP.get(board.background) ?? BOARD_BG_MAP.get('bone')!;
   const sel = board.items.find((i) => i.id === selected) ?? null;
   const imageCount = board.items.filter((i) => i.type === 'image').length;
 
@@ -307,8 +307,7 @@ export function BoardEditor({ id }: { id: string }) {
 
   const cycleStyle = () => {
     if (sel?.type !== 'text') return;
-    const styles: TextStyle[] = ['display', 'serif', 'script', 'sans'];
-    const next = styles[(styles.indexOf(sel.style) + 1) % styles.length];
+    const next = TEXT_STYLE_ORDER[(TEXT_STYLE_ORDER.indexOf(sel.style) + 1) % TEXT_STYLE_ORDER.length];
     updateItem(sel.id, { style: next } as Partial<BoardItem>, true);
     toast(TEXT_STYLE_LABELS[next]);
   };
@@ -327,20 +326,20 @@ export function BoardEditor({ id }: { id: string }) {
     <div className="editor">
       <header className="editor-top">
         <button className="icon-btn" onClick={() => { flush(); goBack('/vision'); }} aria-label="Back">
-          <ChevronLeft size={24} />
+          <ChevronLeft size={24} strokeWidth={1.3} />
         </button>
         <button className="editor-title" onClick={() => setSheet('more')}>
           {board.title}
         </button>
         <div className="row gap-s">
           <button className="icon-btn" onClick={undo} disabled={!history.current.length} aria-label="Undo">
-            <Undo2 size={20} />
+            <Undo2 size={20} strokeWidth={1.3} />
           </button>
           <button className="icon-btn" onClick={() => { setSelected(null); setPresenting(true); }} aria-label="Present">
-            <Expand size={20} />
+            <Expand size={20} strokeWidth={1.3} />
           </button>
           <button className="icon-btn" onClick={() => setSheet('more')} aria-label="Board options">
-            <MoreHorizontal size={20} />
+            <MoreHorizontal size={20} strokeWidth={1.3} />
           </button>
         </div>
       </header>
@@ -376,9 +375,9 @@ export function BoardEditor({ id }: { id: string }) {
             {imageCount === 0 && (
               <div className="board-empty" onPointerDown={(e) => e.stopPropagation()}>
                 <button className="btn btn--primary btn--big" onClick={() => fileInput.current?.click()} disabled={busy}>
-                  {busy ? <span className="spinner" /> : <ImagePlus size={20} />} Add photos
+                  {busy ? <span className="spinner" /> : <ImagePlus size={20} strokeWidth={1.3} />} Add images
                 </button>
-                <p>Pick the photos that make you feel it. We’ll lay them out, then make it yours.</p>
+                <p>Choose the images that make you feel it. They will be arranged for you; then make the board your own.</p>
               </div>
             )}
           </div>
@@ -390,10 +389,10 @@ export function BoardEditor({ id }: { id: string }) {
           <div className="toolrow" key="sel">
             {sel.type === 'text' ? (
               <>
-                <Tool icon={<Pencil size={20} />} label="Edit" onClick={() => { setEditingText(sel); setSheet('text'); }} />
-                <Tool icon={<Type size={20} />} label="Font" onClick={cycleStyle} />
+                <Tool icon={<Pencil size={20} strokeWidth={1.3} />} label="Edit" onClick={() => { setEditingText(sel); setSheet('text'); }} />
+                <Tool icon={<Type size={20} strokeWidth={1.3} />} label="Font" onClick={cycleStyle} />
                 <Tool
-                  icon={<Palette size={20} />}
+                  icon={<Palette size={20} strokeWidth={1.3} />}
                   label="Color"
                   onClick={() => {
                     const next = TEXT_COLORS[(TEXT_COLORS.indexOf(sel.color) + 1) % TEXT_COLORS.length];
@@ -401,35 +400,35 @@ export function BoardEditor({ id }: { id: string }) {
                   }}
                 />
                 <Tool
-                  icon={<Highlighter size={20} />}
+                  icon={<Highlighter size={20} strokeWidth={1.3} />}
                   label="Label"
                   active={!!sel.bg}
                   onClick={() => {
-                    const bgc = sel.bg ? null : sel.color === '#0B0B0C' ? '#F4F1EA' : sel.color === '#F4F1EA' ? '#FF3347' : '#0B0B0C';
+                    const bgc = sel.bg ? null : sel.color === '#1E1D1B' ? '#F4F3F0' : '#1E1D1B';
                     updateItem(sel.id, { bg: bgc } as Partial<BoardItem>, true);
                   }}
                 />
               </>
             ) : (
               <Tool
-                icon={<Frame size={20} />}
-                label="Polaroid"
+                icon={<Frame size={20} strokeWidth={1.3} />}
+                label="Print"
                 active={sel.frame === 'polaroid'}
                 onClick={() => updateItem(sel.id, { frame: sel.frame === 'polaroid' ? 'none' : 'polaroid' } as Partial<BoardItem>, true)}
               />
             )}
-            <Tool icon={<BringToFront size={20} />} label="Front" onClick={() => reorder('front')} />
-            <Tool icon={<SendToBack size={20} />} label="Back" onClick={() => reorder('back')} />
-            <Tool icon={<Copy size={20} />} label="Copy" onClick={duplicate} />
-            <Tool icon={<Trash2 size={20} />} label="Delete" danger onClick={remove} />
+            <Tool icon={<BringToFront size={20} strokeWidth={1.3} />} label="Front" onClick={() => reorder('front')} />
+            <Tool icon={<SendToBack size={20} strokeWidth={1.3} />} label="Back" onClick={() => reorder('back')} />
+            <Tool icon={<Copy size={20} strokeWidth={1.3} />} label="Copy" onClick={duplicate} />
+            <Tool icon={<Trash2 size={20} strokeWidth={1.3} />} label="Delete" danger onClick={remove} />
           </div>
         ) : (
           <div className="toolrow" key="main">
-            <Tool icon={busy ? <span className="spinner" /> : <ImagePlus size={22} />} label="Photos" onClick={() => fileInput.current?.click()} />
-            <Tool icon={<Type size={22} />} label="Words" onClick={() => { setEditingText(null); setSheet('text'); }} />
-            <Tool icon={<LayoutGrid size={22} />} label="Layout" onClick={() => setSheet('layout')} disabled={imageCount === 0} />
-            <Tool icon={<Palette size={22} />} label="Style" onClick={() => setSheet('style')} />
-            <Tool icon={<Download size={22} />} label="Save" accent onClick={() => { flush(); setSheet('export'); }} />
+            <Tool icon={busy ? <span className="spinner" /> : <ImagePlus size={22} strokeWidth={1.3} />} label="Images" onClick={() => fileInput.current?.click()} />
+            <Tool icon={<Type size={22} strokeWidth={1.3} />} label="Words" onClick={() => { setEditingText(null); setSheet('text'); }} />
+            <Tool icon={<LayoutGrid size={22} strokeWidth={1.3} />} label="Layout" onClick={() => setSheet('layout')} disabled={imageCount === 0} />
+            <Tool icon={<Palette size={22} strokeWidth={1.3} />} label="Style" onClick={() => setSheet('style')} />
+            <Tool icon={<Download size={22} strokeWidth={1.3} />} label="Save" accent onClick={() => { flush(); setSheet('export'); }} />
           </div>
         )}
       </div>
@@ -463,13 +462,13 @@ export function BoardEditor({ id }: { id: string }) {
         }}
       />
 
-      <Sheet open={sheet === 'layout'} onClose={() => setSheet(null)} eyebrow="Auto-arrange" title="LAYOUT">
+      <Sheet open={sheet === 'layout'} onClose={() => setSheet(null)} eyebrow="Arrange" title="Layout">
         <div className="layout-options">
           {(
             [
-              ['collage', 'Collage', 'Tight mosaic, edge to edge'],
-              ['grid', 'Grid', 'Clean and even'],
-              ['scatter', 'Scatter', 'Polaroids on the table'],
+              ['collage', 'Mosaic', 'Edge to edge, quietly varied'],
+              ['grid', 'Gallery', 'Even, with room to breathe'],
+              ['scatter', 'Prints', 'Photographs laid on a table'],
             ] as [LayoutKind, string, string][]
           ).map(([k, label, hint]) => (
             <button key={k} className="layout-option" onClick={() => applyLayout(k)}>
@@ -485,11 +484,11 @@ export function BoardEditor({ id }: { id: string }) {
           ))}
         </div>
         <p className="muted small center">
-          <Shuffle size={13} /> Tap again to shuffle. Words stay where you put them.
+          <Shuffle size={12} strokeWidth={1.5} /> Tap again for a new arrangement. Words stay where you placed them.
         </p>
       </Sheet>
 
-      <Sheet open={sheet === 'style'} onClose={() => setSheet(null)} eyebrow="Board" title="STYLE">
+      <Sheet open={sheet === 'style'} onClose={() => setSheet(null)} eyebrow="Board" title="Style">
         <div className="field">
           <label className="field-label">Background</label>
           <div className="swatches">
@@ -501,7 +500,7 @@ export function BoardEditor({ id }: { id: string }) {
                 onClick={() => setBoard((x) => ({ ...x, background: b.id }), { snapshot: true })}
                 aria-label={b.label}
               >
-                <span>{b.label}</span>
+                <span style={{ color: b.ink }}>{b.label}</span>
               </button>
             ))}
           </div>
@@ -518,7 +517,7 @@ export function BoardEditor({ id }: { id: string }) {
 
       <ExportSheet open={sheet === 'export'} board={board} onClose={() => setSheet(null)} />
 
-      <Sheet open={sheet === 'more'} onClose={() => setSheet(null)} eyebrow="Board" title="OPTIONS">
+      <Sheet open={sheet === 'more'} onClose={() => setSheet(null)} eyebrow="Board" title="Options">
         <div className="field">
           <label className="field-label" htmlFor="rename">Name</label>
           <input id="rename" className="input" value={board.title} onChange={(e) => setBoard((b) => ({ ...b, title: e.target.value }))} />
@@ -585,14 +584,14 @@ function TextSheet({
     setLabel(!!initial?.bg);
   }, [open, initial, defaultColor]);
 
-  const labelBg = color === '#0B0B0C' ? '#F4F1EA' : '#0B0B0C';
+  const labelBg = color === '#1E1D1B' ? '#F4F3F0' : '#1E1D1B';
 
   return (
     <Sheet
       open={open}
       onClose={onClose}
       eyebrow={initial ? 'Edit words' : 'Add words'}
-      title="SAY IT"
+      title="Words"
       footer={
         <button className="btn btn--primary btn--block btn--big" disabled={!text.trim()} onClick={() => onSave({ text: text.trim(), style, color, bg: label ? labelBg : null })}>
           {initial ? 'Update' : 'Add to board'}
@@ -600,7 +599,7 @@ function TextSheet({
       }
     >
       <div className="field">
-        <textarea className="input textarea textarea--big" rows={2} placeholder="Type it into existence…" value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea className="input textarea textarea--big" rows={2} placeholder="Write what you are becoming…" value={text} onChange={(e) => setText(e.target.value)} />
         <div className="chip-row">
           {VISION_WORDS.map((w) => (
             <button key={w} className="chip" onClick={() => setText(w)}>
@@ -612,9 +611,9 @@ function TextSheet({
       <div className="field">
         <label className="field-label">Font</label>
         <div className="font-options">
-          {(Object.keys(TEXT_STYLE_LABELS) as TextStyle[]).map((s) => (
+          {TEXT_STYLE_ORDER.map((s) => (
             <button key={s} className={`font-option font-option--${s} ${style === s ? 'is-on' : ''}`} onClick={() => setStyle(s)}>
-              <b>{s === 'display' ? 'AA' : 'Aa'}</b>
+              <b>{s === 'sans' ? 'AA' : 'Aa'}</b>
               <span>{TEXT_STYLE_LABELS[s]}</span>
             </button>
           ))}
@@ -627,7 +626,7 @@ function TextSheet({
             <button key={c} className={`swatch ${color === c ? 'is-on' : ''}`} style={{ background: c }} onClick={() => setColor(c)} aria-label={c} />
           ))}
           <button className={`chip ${label ? 'is-on' : ''}`} onClick={() => setLabel((l) => !l)}>
-            <Highlighter size={14} /> Label
+            <Highlighter size={13} strokeWidth={1.5} /> Label
           </button>
         </div>
       </div>
@@ -685,26 +684,26 @@ function ExportSheet({ open, board, onClose }: { open: boolean; board: Board; on
       open={open}
       onClose={onClose}
       eyebrow="Export"
-      title={board.aspect === '9:19.5' ? 'MAKE IT YOUR WALLPAPER' : 'SAVE THE BOARD'}
+      title={board.aspect === '9:19.5' ? 'Keep it as your wallpaper' : 'Save the board'}
       footer={
         <div className="stack gap-s">
           {canShare && (
             <button className="btn btn--primary btn--block btn--big" onClick={share} disabled={!blob}>
-              <Share2 size={18} /> Save / Share image
+              <Share2 size={16} strokeWidth={1.5} /> Save or share image
             </button>
           )}
           <button className={`btn ${canShare ? 'btn--ghost' : 'btn--primary btn--big'} btn--block`} onClick={download} disabled={!blob}>
-            <Download size={18} /> Download PNG
+            <Download size={16} strokeWidth={1.5} /> Download image
           </button>
         </div>
       }
     >
       <div className={`export-preview export-preview--${board.aspect.replace(/[:.]/g, '-')}`}>
-        {url ? <img src={url} alt="Exported board" /> : <div className="export-loading"><span className="spinner" /> Rendering in full resolution…</div>}
+        {url ? <img src={url} alt="Exported board" /> : <div className="export-loading"><span className="spinner" /> Preparing full resolution…</div>}
       </div>
       {board.aspect === '9:19.5' && (
         <p className="muted small center">
-          iPhone: Save Image → Photos → Share → Use as Wallpaper. Android: open the image → Set as wallpaper. You’ll see it every time you pick up your phone.
+          On iPhone: Save Image, then in Photos choose Share, Use as Wallpaper. On Android: open the image and choose Set as wallpaper. You will see it each time you reach for your phone.
         </p>
       )}
     </Sheet>

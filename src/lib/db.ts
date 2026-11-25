@@ -1,4 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
+import { emojiToIcon } from './icons';
+import { LEGACY_COLORS } from './presets';
 import type { Board, Entry, KV, Obsession, Photo, Profile, UnlockedAchievement } from './types';
 
 export class ObsessedDB extends Dexie {
@@ -18,6 +20,13 @@ export class ObsessedDB extends Dexie {
       boards: 'id, updatedAt',
       achievements: 'id',
       kv: 'key',
+    });
+    // v2: the calmer redesign. Emoji become line icons and vivid colors become muted tones.
+    this.version(2).stores({}).upgrade(async (tx) => {
+      await tx.table('obsessions').toCollection().modify((o: Obsession) => {
+        if (!o.icon) o.icon = emojiToIcon(o.emoji);
+        o.color = LEGACY_COLORS[o.color.toUpperCase()] ?? o.color;
+      });
     });
   }
 }

@@ -1,16 +1,16 @@
-import { Eye, Film, Flame, Plus, Trophy } from 'lucide-react';
+import { BookOpen, Image, Mountain, Plus, Sun } from 'lucide-react';
+import { formatClock } from '../lib/dates';
 import { buzz } from '../lib/haptics';
-import { elapsedSeconds, useLockIn } from '../lib/lockin';
 import { useNow } from '../lib/hooks';
+import { elapsedSeconds, useLockIn } from '../lib/lockin';
 import { navigate } from '../lib/router';
 import { ui } from '../lib/ui';
-import { formatClock } from '../lib/dates';
 
 const TABS = [
-  { path: '/', label: 'Today', Icon: Flame },
-  { path: '/tape', label: 'Tape', Icon: Film },
-  { path: '/vision', label: 'Vision', Icon: Eye },
-  { path: '/progress', label: 'Progress', Icon: Trophy },
+  { path: '/', label: 'Today', Icon: Sun },
+  { path: '/journal', label: 'Journal', Icon: BookOpen },
+  { path: '/vision', label: 'Vision', Icon: Image },
+  { path: '/progress', label: 'Ascent', Icon: Mountain },
 ];
 
 export function TabBar({ active }: { active: string }) {
@@ -19,32 +19,32 @@ export function TabBar({ active }: { active: string }) {
       key={t.path}
       className={`tab ${active === t.path ? 'is-active' : ''}`}
       onClick={() => {
-        buzz(6);
+        buzz(4);
         navigate(t.path);
         window.scrollTo({ top: 0 });
       }}
       aria-current={active === t.path ? 'page' : undefined}
     >
-      <t.Icon size={22} strokeWidth={active === t.path ? 2.4 : 1.8} />
+      <t.Icon size={21} strokeWidth={1.3} />
       <span>{t.label}</span>
     </button>
   );
 
   return (
     <nav className="tabbar" aria-label="Main">
-      <LockInPill />
+      <FocusPill />
       <div className="tabbar-inner">
         {tab(TABS[0])}
         {tab(TABS[1])}
         <button
-          className="tab-fab"
-          aria-label="Log a rep"
+          className="tab-add"
+          aria-label="New entry"
           onClick={() => {
-            buzz(12);
+            buzz(8);
             ui.openLog();
           }}
         >
-          <Plus size={28} strokeWidth={2.6} />
+          <Plus size={22} strokeWidth={1.4} />
         </button>
         {tab(TABS[2])}
         {tab(TABS[3])}
@@ -53,15 +53,15 @@ export function TabBar({ active }: { active: string }) {
   );
 }
 
-/** Floating reminder that a Lock In session is running. */
-function LockInPill() {
+/** A quiet reminder that a focus session is still running. */
+function FocusPill() {
   const session = useLockIn();
   const now = useNow(1000);
   if (!session) return null;
   return (
-    <button className="lockin-pill" onClick={() => navigate('/lockin')}>
-      <span className={`lockin-pill-dot ${session.pausedAt ? 'is-paused' : ''}`} />
-      {session.pausedAt ? 'PAUSED' : 'LOCKED IN'}
+    <button className="focus-pill" onClick={() => navigate('/focus')}>
+      <span className={`focus-pill-dot ${session.pausedAt ? 'is-paused' : ''}`} />
+      {session.pausedAt ? 'Paused' : 'In focus'}
       <b>{formatClock(elapsedSeconds(session, now))}</b>
     </button>
   );

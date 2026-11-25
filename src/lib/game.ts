@@ -1,6 +1,6 @@
 /**
- * The small game layer: XP, levels, ranks and mastery milestones.
- * Kept deliberately simple and transparent — the work is the point, the game is the hype man.
+ * The quiet game layer: experience, levels, the ascent through ranks, and mastery milestones.
+ * Kept simple and transparent. The work is the point; this only marks the path.
  */
 
 export interface XpInput {
@@ -18,15 +18,15 @@ export interface XpBreakdown {
 }
 
 export function computeXp(i: XpInput): XpBreakdown {
-  const lines: { label: string; xp: number }[] = [{ label: 'Showed up', xp: 10 }];
-  if (i.durationMin > 0) lines.push({ label: `${Math.round(i.durationMin)} min of work`, xp: Math.min(240, Math.round(i.durationMin)) });
-  if (i.photos > 0) lines.push({ label: 'Receipts (photos)', xp: Math.min(3, i.photos) * 5 });
+  const lines: { label: string; xp: number }[] = [{ label: 'Presence', xp: 10 }];
+  if (i.durationMin > 0) lines.push({ label: `${Math.round(i.durationMin)} minutes of practice`, xp: Math.min(240, Math.round(i.durationMin)) });
+  if (i.photos > 0) lines.push({ label: 'Photographs', xp: Math.min(3, i.photos) * 5 });
   if (i.hasNote) lines.push({ label: 'Reflection', xp: 5 });
-  if (i.metrics > 0) lines.push({ label: 'Tracked numbers', xp: i.metrics * 5 });
-  if (i.intensity >= 5) lines.push({ label: 'Fully locked in', xp: 10 });
+  if (i.metrics > 0) lines.push({ label: 'Measurements', xp: i.metrics * 5 });
+  if (i.intensity >= 5) lines.push({ label: 'Deep focus', xp: 10 });
   const base = lines.reduce((s, l) => s + l.xp, 0);
   const streakPct = Math.min(50, Math.max(0, (i.streakDays - 1) * 5));
-  if (streakPct > 0) lines.push({ label: `Streak bonus +${streakPct}%`, xp: Math.round((base * streakPct) / 100) });
+  if (streakPct > 0) lines.push({ label: `Consistency +${streakPct}%`, xp: Math.round((base * streakPct) / 100) });
   return { total: lines.reduce((s, l) => s + l.xp, 0), lines };
 }
 
@@ -51,15 +51,15 @@ export interface Rank {
 }
 
 export const RANKS: Rank[] = [
-  { title: 'Rookie', minLevel: 1, line: 'Everybody starts here. Not everybody stays.' },
-  { title: 'Grinder', minLevel: 3, line: 'You keep coming back. That’s the whole secret.' },
-  { title: 'Student of the Game', minLevel: 6, line: 'Now you’re studying, not just doing.' },
-  { title: 'Craftsman', minLevel: 10, line: 'The details are starting to matter to you.' },
-  { title: 'Pro', minLevel: 15, line: 'You show up when you don’t feel like it.' },
-  { title: 'All-Star', minLevel: 20, line: 'People are starting to notice.' },
-  { title: 'MVP', minLevel: 28, line: 'The standard in every room you walk into.' },
-  { title: 'Legend', minLevel: 36, line: 'They’ll tell stories about your work ethic.' },
-  { title: 'GOAT', minLevel: 50, line: 'Obsessed. Permanently.' },
+  { title: 'Initiate', minLevel: 1, line: 'Every ascent begins with a single step.' },
+  { title: 'Apprentice', minLevel: 3, line: 'You keep returning. That is the whole secret.' },
+  { title: 'Student', minLevel: 6, line: 'Now you study the work, not only do it.' },
+  { title: 'Practitioner', minLevel: 10, line: 'The details have started to matter to you.' },
+  { title: 'Artisan', minLevel: 15, line: 'You show up when you don’t feel like it.' },
+  { title: 'Adept', minLevel: 20, line: 'What once took effort now takes attention.' },
+  { title: 'Master', minLevel: 28, line: 'Your standard quietly raises every room.' },
+  { title: 'Virtuoso', minLevel: 36, line: 'The work and the person have become one.' },
+  { title: 'Legend', minLevel: 50, line: 'Obsessed, permanently.' },
 ];
 
 export function rankForLevel(level: number): Rank {
@@ -89,4 +89,4 @@ export function masteryProgress(totalMin: number) {
   };
 }
 
-export const INTENSITY_LABELS = ['', 'Distracted', 'Going through it', 'Solid', 'Dialed in', 'Locked in'];
+export const INTENSITY_LABELS = ['', 'Scattered', 'Present', 'Steady', 'Focused', 'Deep'];

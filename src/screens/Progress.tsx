@@ -1,14 +1,32 @@
-import { ChevronRight, Lock } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { SectionHead, Stat } from '../components/Bits';
 import { Sheet } from '../components/Sheet';
-import { Bar, BarChart, Heatmap, Ring } from '../components/Viz';
+import { Bar, BarChart, Heatmap } from '../components/Viz';
 import { ACHIEVEMENTS, type AchievementDef } from '../lib/achievements';
 import { addDays, formatDuration, formatHours, parseDayKey, startOfWeekKey } from '../lib/dates';
 import { RANKS, levelFromXp, masteryProgress, nextRank, rankForLevel, xpForLevel } from '../lib/game';
 import { useEntries, useObsessions, useToday, useUnlocked } from '../lib/hooks';
+import { ICONS, ObsessionIcon } from '../lib/icons';
 import { navigate } from '../lib/router';
 import { bestStreak, currentStreak, daySet, minutesByDay, totalMinutes, totalXp } from '../lib/stats';
+
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+
+/** The ranks drawn as a marble staircase; you stand on the step you have reached. */
+function Staircase({ level }: { level: number }) {
+  const current = RANKS.reduce((idx, r, i) => (level >= r.minLevel ? i : idx), 0);
+  return (
+    <div className="stairs" role="img" aria-label={`Rank ${current + 1} of ${RANKS.length}: ${RANKS[current].title}`}>
+      {RANKS.map((r, i) => (
+        <div key={r.title} className={`stair ${i < current ? 'is-past' : ''} ${i === current ? 'is-here' : ''}`} style={{ height: `${22 + i * 9.5}%` }}>
+          {i === current && <span className="stair-marker" />}
+          <span className="stair-num">{ROMAN[i]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function Progress() {
   const today = useToday();
@@ -44,58 +62,45 @@ export function Progress() {
   return (
     <div className="screen">
       <header className="screen-head">
-        <h1 className="display">PROGRESS</h1>
-        <p>The scoreboard doesn’t lie.</p>
+        <h1 className="display">The Ascent</h1>
+        <p>Progress, one step at a time.</p>
       </header>
 
-      <section className="rank-hero">
-        <div className="rank-hero-glow" />
-        <Ring value={lvl.progress} size={132} stroke={8} color="url(#rankgrad)" track="rgba(255,255,255,0.08)">
-          <div className="rank-hero-level">
-            <span>LEVEL</span>
-            <b>{lvl.level}</b>
+      <section className="ascent">
+        <Staircase level={lvl.level} />
+        <div className="ascent-text">
+          <div className="label">Level {lvl.level}</div>
+          <div className="ascent-rank">{rank.title}</div>
+          <p className="ascent-line">{rank.line}</p>
+          <Bar value={lvl.progress} color="var(--accent)" />
+          <div className="ascent-meta">
+            <span>{xp.toLocaleString()} experience</span>
+            <span>{(xpForLevel(lvl.level + 1) - xp).toLocaleString()} to level {lvl.level + 1}</span>
           </div>
-        </Ring>
-        <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
-          <defs>
-            <linearGradient id="rankgrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#F7C548" />
-              <stop offset="1" stopColor="#FF3347" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="rank-hero-title">{rank.title}</div>
-        <p className="rank-hero-line">{rank.line}</p>
-        <div className="rank-hero-xp">
-          <b>{xp.toLocaleString()}</b> XP total · {(xpForLevel(lvl.level + 1) - xp).toLocaleString()} to level {lvl.level + 1}
+          {upcoming && (
+            <p className="ascent-next">
+              Next step: <b>{upcoming.title}</b>, at level {upcoming.minLevel}
+            </p>
+          )}
         </div>
-        {upcoming && (
-          <div className="rank-hero-next">
-            Next rank: <b>{upcoming.title}</b> at level {upcoming.minLevel}
-          </div>
-        )}
       </section>
 
       <div className="stat-grid">
-        <Stat value={formatHours(minutes)} label="Hours put in" />
-        <Stat value={entries.length.toLocaleString()} label="Reps logged" />
-        <Stat value={streak.length} label="Current streak" accent={streak.length ? '#FF7A1A' : undefined} />
-        <Stat value={best} label="Best streak" accent={best ? '#F7C548' : undefined} />
+        <Stat value={formatHours(minutes)} label="Hours of practice" />
+        <Stat value={entries.length.toLocaleString()} label="Sessions recorded" />
+        <Stat value={streak.length} label="Current streak" />
+        <Stat value={best} label="Longest streak" />
       </div>
 
-      <SectionHead title="The grind map" />
-      <div className="card">
-        <Heatmap minutes={heat} weeks={18} />
-      </div>
+      <SectionHead title="Practice calendar" />
+      <Heatmap minutes={heat} weeks={18} />
 
       <SectionHead title="Hours per week" />
-      <div className="card">
-        <BarChart data={weekly} />
-      </div>
+      <BarChart data={weekly} />
 
       {obsessions.length > 0 && (
         <>
-          <SectionHead title="Path to mastery" />
+          <SectionHead title="The path to mastery" />
           <div className="mastery-list">
             {obsessions.map((o) => {
               const min = totalMinutes(entries, o.id);
@@ -104,16 +109,17 @@ export function Progress() {
                 <button key={o.id} className="mastery" onClick={() => navigate(`/o/${o.id}`)} style={{ ['--oc' as string]: o.color }}>
                   <div className="mastery-top">
                     <span className="mastery-name">
-                      {o.emoji} {o.name}
+                      <ObsessionIcon o={o} size={16} />
+                      {o.name}
                     </span>
                     <span className="mastery-hours">
-                      <b>{formatHours(min)}</b> / {m.next.toLocaleString()} hrs
+                      <b>{formatHours(min)}</b> of {m.next.toLocaleString()} hours
                     </span>
                   </div>
-                  <Bar value={m.progress} color={o.color} />
+                  <Bar value={m.progress} color="var(--oc-ink)" />
                   <div className="mastery-foot">
-                    <span>{(m.toMastery * 100).toFixed(m.toMastery < 0.01 ? 2 : 1)}% of the way to 10,000 hours</span>
-                    <ChevronRight size={14} />
+                    <span>{(m.toMastery * 100).toFixed(m.toMastery < 0.01 ? 2 : 1)}% of the way to ten thousand hours</span>
+                    <ChevronRight size={14} strokeWidth={1.3} />
                   </div>
                 </button>
               );
@@ -122,43 +128,53 @@ export function Progress() {
         </>
       )}
 
-      <SectionHead title="Trophy case" action={<span className="section-meta">{unlocked.length}/{ACHIEVEMENTS.length}</span>} />
-      <div className="badges">
+      <SectionHead title="Milestones" action={<span className="section-meta">{unlocked.length} of {ACHIEVEMENTS.length}</span>} />
+      <div className="medals">
         {ACHIEVEMENTS.map((a) => {
           const at = unlockedMap.get(a.id);
+          const Icon = ICONS[a.icon];
           return (
-            <button key={a.id} className={`badge ${at ? 'is-unlocked' : ''}`} onClick={() => setBadge(a)}>
-              <span className={`badge-medal badge-medal--${a.tier}`}>{at ? a.emoji : <Lock size={18} />}</span>
-              <span className="badge-title">{a.title}</span>
+            <button key={a.id} className={`medal-cell ${at ? 'is-earned' : ''}`} onClick={() => setBadge(a)}>
+              <span className={`medal medal--${a.tier} ${at ? 'is-earned' : ''}`}>
+                <Icon size={18} strokeWidth={1.25} />
+              </span>
+              <span className="medal-title">{a.title}</span>
             </button>
           );
         })}
       </div>
 
-      <SectionHead title="The ladder" />
-      <div className="ladder">
-        {RANKS.map((r) => {
+      <SectionHead title="The ranks" />
+      <ol className="ranks">
+        {RANKS.map((r, i) => {
           const state = lvl.level >= r.minLevel ? (r.title === rank.title ? 'current' : 'done') : 'locked';
           return (
-            <div key={r.title} className={`ladder-row is-${state}`}>
-              <span className="ladder-lv">Lv {r.minLevel}</span>
-              <span className="ladder-title">{r.title}</span>
-              {state === 'current' && <span className="tag tag--gold">You</span>}
-            </div>
+            <li key={r.title} className={`rank-row is-${state}`}>
+              <span className="rank-num">{ROMAN[i]}</span>
+              <span className="rank-title">{r.title}</span>
+              <span className="rank-lv">{state === 'current' ? 'You are here' : `Level ${r.minLevel}`}</span>
+            </li>
           );
         })}
-      </div>
+      </ol>
 
       <Sheet open={!!badge} onClose={() => setBadge(null)}>
         {badge && (
           <div className="badge-detail">
-            <span className={`badge-medal badge-medal--xl badge-medal--${badge.tier} ${unlockedMap.has(badge.id) ? '' : 'is-locked'}`}>{badge.emoji}</span>
+            {(() => {
+              const Icon = ICONS[badge.icon];
+              return (
+                <span className={`medal medal--xl medal--${badge.tier} ${unlockedMap.has(badge.id) ? 'is-earned' : ''}`}>
+                  <Icon size={34} strokeWidth={1} />
+                </span>
+              );
+            })()}
             <h2>{badge.title}</h2>
             <p>{badge.desc}</p>
-            <div className="tag">
+            <div className="label">
               {unlockedMap.has(badge.id)
-                ? `Unlocked ${new Date(unlockedMap.get(badge.id)!).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}`
-                : 'Locked. Keep going.'}
+                ? `Reached ${new Date(unlockedMap.get(badge.id)!).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}`
+                : 'Not yet reached'}
             </div>
           </div>
         )}

@@ -9,6 +9,7 @@ import { toast } from '../lib/events';
 import { buzz } from '../lib/haptics';
 import { useObsessions } from '../lib/hooks';
 import { uid } from '../lib/ids';
+import { ObsessionIcon } from '../lib/icons';
 import { ui, useUI } from '../lib/ui';
 import type { Entry } from '../lib/types';
 
@@ -72,7 +73,7 @@ export function LogSheet() {
 
   const close = () => {
     if (!saved.current && addedPhotos.current.length) {
-      // Photos picked for a rep that was never saved.
+      // Photos picked for an entry that was never saved.
       db.photos.bulkDelete(addedPhotos.current);
     }
     ui.closeLog();
@@ -112,7 +113,7 @@ export function LogSheet() {
 
   const remove = async () => {
     if (!existing) return;
-    const ok = await ui.confirm({ title: 'Delete this rep?', body: 'The XP and photos attached to it go too.', confirmLabel: 'Delete', danger: true });
+    const ok = await ui.confirm({ title: 'Delete this entry?', body: 'Its photographs and experience are removed as well.', confirmLabel: 'Delete', danger: true });
     if (!ok) return;
     await deleteEntry(existing.id);
     saved.current = true;
@@ -126,22 +127,22 @@ export function LogSheet() {
       open={log.open}
       onClose={close}
       eyebrow={existing ? 'Edit' : 'On the record'}
-      title={existing ? 'EDIT REP' : 'LOG A REP'}
+      title={existing ? 'Edit entry' : 'New entry'}
       footer={
         <div className="row gap">
           {existing && (
-            <button className="btn btn--ghost btn--icon" onClick={remove} aria-label="Delete rep">
-              <Trash2 size={20} />
+            <button className="btn btn--ghost btn--icon" onClick={remove} aria-label="Delete entry">
+              <Trash2 size={18} strokeWidth={1.4} />
             </button>
           )}
           <button className="btn btn--primary btn--block btn--big" onClick={submit} disabled={!obsession || saving}>
-            {saving ? 'Saving…' : existing ? 'Save changes' : 'Log it'}
+            {saving ? 'Saving…' : existing ? 'Save changes' : 'Save entry'}
           </button>
         </div>
       }
     >
       {obsessions.length === 0 ? (
-        <p className="muted">Add an obsession first (Settings → Obsessions).</p>
+        <p className="muted">Add an obsession first, in Settings.</p>
       ) : (
         <>
           <div className="field">
@@ -151,13 +152,13 @@ export function LogSheet() {
                 <button
                   key={o.id}
                   className={`chip chip--big ${o.id === obsessionId ? 'is-on' : ''}`}
-                  style={o.id === obsessionId ? { borderColor: o.color, background: `${o.color}22` } : undefined}
+                  style={{ ['--oc' as string]: o.color }}
                   onClick={() => {
-                    buzz(6);
+                    buzz(4);
                     setObsessionId(o.id);
                   }}
                 >
-                  <span className="chip-emoji">{o.emoji}</span>
+                  <ObsessionIcon o={o} size={16} />
                   {o.name}
                 </button>
               ))}
@@ -166,24 +167,24 @@ export function LogSheet() {
 
           <div className="field">
             <label className="field-label">
-              Time put in <span className="field-hint">{duration ? formatDuration(duration) : 'Not timed'}</span>
+              Duration <span className="field-hint">{duration ? formatDuration(duration) : 'Not timed'}</span>
             </label>
             <div className="duration">
-              <button className="icon-btn icon-btn--solid" onClick={() => setDuration((d) => Math.max(0, d - 5))} aria-label="5 minutes less">
-                <Minus size={18} />
+              <button className="icon-btn icon-btn--line" onClick={() => setDuration((d) => Math.max(0, d - 5))} aria-label="5 minutes less">
+                <Minus size={16} strokeWidth={1.4} />
               </button>
               <div className="duration-value">
                 <b>{duration}</b>
                 <span>min</span>
               </div>
-              <button className="icon-btn icon-btn--solid" onClick={() => setDuration((d) => Math.min(24 * 60, d + 5))} aria-label="5 minutes more">
-                <Plus size={18} />
+              <button className="icon-btn icon-btn--line" onClick={() => setDuration((d) => Math.min(24 * 60, d + 5))} aria-label="5 minutes more">
+                <Plus size={16} strokeWidth={1.4} />
               </button>
             </div>
             <div className="chip-row">
               {QUICK_DURATIONS.map((d) => (
                 <button key={d} className={`chip ${duration === d ? 'is-on' : ''}`} onClick={() => setDuration(d)}>
-                  {d === 0 ? 'No timer' : formatDuration(d)}
+                  {d === 0 ? 'Untimed' : formatDuration(d)}
                 </button>
               ))}
             </div>

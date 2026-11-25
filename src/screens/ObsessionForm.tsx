@@ -7,7 +7,8 @@ import { formatDuration } from '../lib/dates';
 import { toast } from '../lib/events';
 import { uid } from '../lib/ids';
 import { MODE_HINT, MODE_LABEL, metricMode, nextMode } from '../lib/metrics';
-import { EMOJI_CHOICES, OBSESSION_COLORS, PRESETS } from '../lib/presets';
+import { ICONS, ICON_KEYS, ObsessionIcon, iconKeyFor } from '../lib/icons';
+import { OBSESSION_COLORS, PRESETS } from '../lib/presets';
 import { navigate } from '../lib/router';
 import { ui, useUI } from '../lib/ui';
 import type { MetricDef, Obsession } from '../lib/types';
@@ -18,7 +19,7 @@ export function ObsessionForm() {
   const { obsessionForm } = useUI();
   const [existing, setExisting] = useState<Obsession | null>(null);
   const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('🔥');
+  const [icon, setIcon] = useState('compass');
   const [color, setColor] = useState(OBSESSION_COLORS[0]);
   const [target, setTarget] = useState(60);
   const [why, setWhy] = useState('');
@@ -31,7 +32,7 @@ export function ObsessionForm() {
         if (!o) return;
         setExisting(o);
         setName(o.name);
-        setEmoji(o.emoji);
+        setIcon(iconKeyFor(o));
         setColor(o.color);
         setTarget(o.dailyTargetMin);
         setWhy(o.why);
@@ -40,7 +41,7 @@ export function ObsessionForm() {
     } else {
       setExisting(null);
       setName('');
-      setEmoji('🔥');
+      setIcon('compass');
       setColor(OBSESSION_COLORS[Math.floor(Math.random() * OBSESSION_COLORS.length)]);
       setTarget(60);
       setWhy('');
@@ -50,7 +51,7 @@ export function ObsessionForm() {
 
   const applyPreset = (p: (typeof PRESETS)[number]) => {
     setName(p.name);
-    setEmoji(p.emoji);
+    setIcon(p.icon);
     setColor(p.color);
     setTarget(p.target);
     setWhy(p.why);
@@ -61,12 +62,12 @@ export function ObsessionForm() {
     if (!name.trim()) return;
     const clean = metrics.filter((m) => m.name.trim()).map((m) => ({ ...m, name: m.name.trim(), unit: m.unit.trim() || 'x' }));
     if (existing) {
-      await db.obsessions.update(existing.id, { name: name.trim(), emoji, color, dailyTargetMin: target, why: why.trim(), metrics: clean });
+      await db.obsessions.update(existing.id, { name: name.trim(), icon, color, dailyTargetMin: target, why: why.trim(), metrics: clean });
       toast('Saved');
     } else {
       const order = (await db.obsessions.count()) + 1;
-      await db.obsessions.add({ id: uid(), name: name.trim(), emoji, color, dailyTargetMin: target, why: why.trim(), metrics: clean, createdAt: Date.now(), archived: false, order });
-      toast(`${emoji} ${name.trim()} added. Get obsessed.`);
+      await db.obsessions.add({ id: uid(), name: name.trim(), icon, color, dailyTargetMin: target, why: why.trim(), metrics: clean, createdAt: Date.now(), archived: false, order });
+      toast(`${name.trim()} added`);
     }
     ui.closeObsessionForm();
   };
@@ -83,7 +84,7 @@ export function ObsessionForm() {
     const n = await db.entries.where('obsessionId').equals(existing.id).count();
     const ok = await ui.confirm({
       title: `Delete ${existing.name}?`,
-      body: n ? `This permanently deletes ${n} logged rep${n > 1 ? 's' : ''}. Archive it instead to keep your history.` : 'This can’t be undone.',
+      body: n ? `This permanently deletes ${n} recorded session${n > 1 ? 's' : ''}. Archive it instead to keep your history.` : 'This cannot be undone.',
       confirmLabel: 'Delete forever',
       danger: true,
     });
@@ -98,7 +99,7 @@ export function ObsessionForm() {
       open={obsessionForm.open}
       onClose={ui.closeObsessionForm}
       eyebrow={existing ? 'Edit obsession' : 'New obsession'}
-      title={existing ? `${emoji} ${name || 'Obsession'}` : 'WHAT ARE YOU CHASING?'}
+      title={existing ? name || 'Obsession' : 'What are you devoted to?'}
       footer={
         <button className="btn btn--primary btn--block btn--big" onClick={save} disabled={!name.trim()}>
           {existing ? 'Save' : 'Add obsession'}
@@ -111,7 +112,7 @@ export function ObsessionForm() {
           <div className="chip-row">
             {PRESETS.map((p) => (
               <button key={p.name} className={`chip ${name === p.name ? 'is-on' : ''}`} onClick={() => applyPreset(p)}>
-                {p.emoji} {p.name}
+                <ObsessionIcon o={{ icon: p.icon }} size={15} /> {p.name}
               </button>
             ))}
           </div>
@@ -125,12 +126,15 @@ export function ObsessionForm() {
 
       <div className="field">
         <label className="field-label">Icon</label>
-        <div className="emoji-grid">
-          {EMOJI_CHOICES.map((e) => (
-            <button key={e} className={emoji === e ? 'is-on' : ''} onClick={() => setEmoji(e)}>
-              {e}
-            </button>
-          ))}
+        <div className="icon-grid">
+          {ICON_KEYS.map((k) => {
+            const Icon = ICONS[k];
+            return (
+              <button key={k} className={icon === k ? 'is-on' : ''} onClick={() => setIcon(k)} aria-label={k}>
+                <Icon size={20} strokeWidth={1.3} />
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -145,24 +149,24 @@ export function ObsessionForm() {
 
       <div className="field">
         <label className="field-label">
-          Daily commitment <span className="field-hint">{target ? formatDuration(target) + ' a day' : 'Just show up'}</span>
+          Daily commitment <span className="field-hint">{target ? formatDuration(target) + ' a day' : 'Simply show up'}</span>
         </label>
         <div className="chip-row">
           {TARGETS.map((t) => (
             <button key={t} className={`chip ${target === t ? 'is-on' : ''}`} onClick={() => setTarget(t)}>
-              {t === 0 ? 'Any rep' : formatDuration(t)}
+              {t === 0 ? 'Any session' : formatDuration(t)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="field">
-        <label className="field-label" htmlFor="o-why">Your why <span className="field-hint">Shows up when it gets hard</span></label>
+        <label className="field-label" htmlFor="o-why">Your why <span className="field-hint">Returns to you when it gets hard</span></label>
         <textarea id="o-why" className="input textarea" rows={2} placeholder="Why does this matter so much to you?" value={why} onChange={(e) => setWhy(e.target.value)} />
       </div>
 
       <div className="field">
-        <label className="field-label">Numbers to track <span className="field-hint">Tap the mode to switch</span></label>
+        <label className="field-label">Measurements <span className="field-hint">Tap the mode to change it</span></label>
         <div className="metric-editor">
           {metrics.map((m, i) => (
             <div key={m.id} className="metric-editor-row">
@@ -176,12 +180,12 @@ export function ObsessionForm() {
                 {MODE_LABEL[metricMode(m)]}
               </button>
               <button className="icon-btn" onClick={() => setMetrics(metrics.filter((_, j) => j !== i))} aria-label="Remove">
-                <X size={16} />
+                <X size={15} strokeWidth={1.4} />
               </button>
             </div>
           ))}
           <button className="link-btn" onClick={() => setMetrics([...metrics, { id: uid(), name: '', unit: '' }])}>
-            <Plus size={16} /> Add a number
+            <Plus size={15} strokeWidth={1.5} /> Add a measurement
           </button>
         </div>
       </div>

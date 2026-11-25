@@ -1,18 +1,15 @@
 // Renders the app icon SVG into the PNG sizes iOS/Android expect, using the bundled Chromium.
 import { createRequire } from 'node:module';
-const { chromium } = createRequire(import.meta.url)('playwright');
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
+const { chromium } = createRequire(import.meta.url)('playwright');
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const svg = readFileSync(join(root, 'public/favicon.svg'), 'utf8');
+const flat = svg.replace('rx="112"', 'rx="0"'); // iOS rounds the corners itself
 // Maskable icons need a safe zone: full-bleed background, mark scaled into the middle 80%.
-const maskable = svg
-  .replace('rx="112"', 'rx="0"')
-  .replace('<circle cx="256" cy="256" r="148"', '<g transform="translate(51.2 51.2) scale(.8)"><circle cx="256" cy="256" r="148"')
-  .replace('fill="#F4F1EA"/>', 'fill="#F4F1EA"/></g>');
-const flat = svg.replace('rx="112"', 'rx="0"'); // iOS rounds corners itself
+const maskable = flat.replace('<g id="mark">', '<g id="mark" transform="translate(51.2 51.2) scale(.8)">');
 
 const targets = [
   ['icons/icon-192.png', 192, svg],

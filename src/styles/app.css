@@ -37,8 +37,9 @@
 
   --serif: 'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
   --sans: 'Jost Variable', 'Jost', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* env() on the web; on Android, Capacitor also injects --safe-area-inset-* for older WebViews. */
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
   --tabbar-h: 62px;
   --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
   --slow: 600ms;

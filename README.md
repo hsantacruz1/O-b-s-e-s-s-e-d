@@ -66,6 +66,18 @@ npm run dev        # prints a Network URL like http://192.168.1.20:5173. Open it
 
 On the first screen, **Just looking? Explore with sample data** (or later, **Settings → Load sample data**) fills in a few weeks of sessions so you can see every screen populated. Remove it with one tap in Settings.
 
+## Android app (APK)
+
+The same app, wrapped as a real Android app with [Capacitor](https://capacitorjs.com): its own icon in the app drawer, its files built in, the screen kept awake during Focus, and saving or sharing through Android's share sheet.
+
+**Install:** on your phone, open **https://github.com/hsantacruz1/O-b-s-e-s-s-e-d/releases/latest/download/obsessed.apk**, then open the downloaded file and allow your browser to install apps when Android asks. To update, install the newer APK the same way; your data stays.
+
+**Build a new APK:** Actions → **Build Android app** → Run workflow. It publishes a new release with `obsessed.apk`.
+
+**One-time setup (already done if releases exist):** the build signs the app with a private key kept in the repository secret `ANDROID_KEYSTORE_BASE64` (Settings → Secrets and variables → Actions). Keep a copy of that key somewhere safe. Every update must be signed with the same key, or Android will refuse to install it over the existing app.
+
+The Android app keeps its own data, separate from the web version. Use Settings → Export backup in one and Restore from backup in the other to move your history.
+
 ## Deploy (free, GitHub Pages)
 
 1. In this repo: **Settings → Pages → Source: GitHub Actions**.
@@ -79,10 +91,11 @@ npm install
 npm run dev         # local dev server
 npm run build       # typecheck + production build into dist/
 npm run preview     # serve the production build
-npm run icons       # re-render PNG app icons from public/favicon.svg
+npm run icons       # re-render the web and Android icons from public/favicon.svg
+npx cap sync android  # copy the web build into the Android project (CI does this)
 ```
 
-**Stack:** React 19, TypeScript, Vite, Dexie (IndexedDB) for offline storage of entries and photos, vite-plugin-pwa (Workbox) for offline support and installability, and lucide icons. Charts are hand-built SVG, so there's no chart library.
+**Stack:** React 19, TypeScript, Vite, Dexie (IndexedDB) for offline storage of entries and photos, vite-plugin-pwa (Workbox) for offline support and installability, Capacitor for the Android app, and lucide icons. Charts are hand-built SVG, so there's no chart library.
 
 ```
 src/

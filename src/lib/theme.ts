@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { setSystemBarsForTheme } from './native';
 
 /** Day (marble) or Night (nero). "system" follows the phone. */
 export type ThemePref = 'system' | 'light' | 'dark';
@@ -36,8 +37,9 @@ export function applyTheme(pref: ThemePref = current): void {
     root.dataset.theme = pref;
     owned = true;
   }
-  const meta = document.querySelector('meta[name="theme-color"]');
-  meta?.setAttribute('content', isDark(pref) ? '#121211' : '#F3F2EF');
+  const dark = isDark(pref);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#121211' : '#F3F2EF');
+  setSystemBarsForTheme(dark);
 }
 
 export function setTheme(pref: ThemePref): void {

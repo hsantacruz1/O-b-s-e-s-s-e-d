@@ -12,6 +12,7 @@ import { ObsessionIcon } from '../lib/icons';
 import { uid } from '../lib/ids';
 import { elapsedSeconds, lockIn, useLockIn } from '../lib/lockin';
 import { mantraForDay } from '../lib/mantras';
+import { isNative, setKeepAwake } from '../lib/native';
 import { goBack, navigate, useRoute } from '../lib/router';
 import { ui } from '../lib/ui';
 
@@ -20,7 +21,14 @@ const GOALS = [0, 25, 45, 60, 90, 120];
 /** Keep the screen awake during a session (where the browser allows it). */
 function useWakeLock(active: boolean) {
   useEffect(() => {
-    if (!active || !('wakeLock' in navigator)) return;
+    if (!active) return;
+    if (isNative()) {
+      setKeepAwake(true).catch(() => {});
+      return () => {
+        setKeepAwake(false).catch(() => {});
+      };
+    }
+    if (!('wakeLock' in navigator)) return;
     let sentinel: WakeLockSentinel | null = null;
     let cancelled = false;
     const acquire = async () => {

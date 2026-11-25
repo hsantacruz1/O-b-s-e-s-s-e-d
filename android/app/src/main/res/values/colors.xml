@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Marble: the app's day ground -->
+    <color name="obsessed_ground">#F3F2EF</color>
+</resources>

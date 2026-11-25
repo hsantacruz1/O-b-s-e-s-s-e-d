@@ -1,0 +1,80 @@
+# Builds the Android app (APK) and publishes it as a GitHub release you can download on your phone.
+#
+# One-time setup: add the repository secret ANDROID_KEYSTORE_BASE64 (Settings → Secrets and variables →
+# Actions → New repository secret). It holds the app's signing key. Every release must be signed with the
+# same key, otherwise Android refuses to install it as an update over the previous one.
+#
+# Run it from the Actions tab ("Build Android app" → Run workflow). The newest APK is always at:
+#   https://github.com/<owner>/<repo>/releases/latest/download/obsessed.apk
+name: Build Android app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write # to publish the release
+
+concurrency:
+  group: android
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build the web app
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Restore the signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/obsessed.keystore"
+          else
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret yet: building an unsigned test APK only."
+          fi
+
+      - name: Build the APK
+        working-directory: android
+        env:
+          # The keystore file itself is the secret; its password only unlocks the file.
+          ANDROID_KEYSTORE_PASSWORD: obsessed-release
+          ANDROID_KEY_ALIAS: obsessed
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: 1.${{ github.run_number }}
+        run: |
+          if [ -f "$RUNNER_TEMP/obsessed.keystore" ]; then export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/obsessed.keystore"; fi
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          ls -la app/build/outputs/apk/release/
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f "$RUNNER_TEMP/obsessed.keystore" ]; then
+            echo "::error::The build works, but the ANDROID_KEYSTORE_BASE64 secret is missing, so there is nothing installable to publish. Add it under Settings → Secrets and variables → Actions, then run this again."
+            exit 1
+          fi
+          cp android/app/build/outputs/apk/release/app-release.apk obsessed.apk
+          gh release create "android-${{ github.run_number }}" obsessed.apk \
+            --target "${{ github.sha }}" \
+            --title "OBSESSED for Android, build ${{ github.run_number }}" \
+            --notes "Open this page on your Android phone and tap obsessed.apk to download and install it. Installing over an earlier build keeps your data." \
+            --latest

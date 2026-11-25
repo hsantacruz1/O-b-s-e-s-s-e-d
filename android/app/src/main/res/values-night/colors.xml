@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nero: the app's night ground -->
+    <color name="obsessed_ground">#121211</color>
+</resources>

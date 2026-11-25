@@ -10,6 +10,7 @@ import { OATH } from '../lib/mantras';
 import { goBack } from '../lib/router';
 import { hasSampleData, loadSampleData, removeSampleData } from '../lib/sample';
 import { ObsessionIcon } from '../lib/icons';
+import { isNative, shareFileNative } from '../lib/native';
 import { setTheme, useThemePref } from '../lib/theme';
 import { ui } from '../lib/ui';
 
@@ -23,7 +24,7 @@ export function Settings() {
   const importInput = useRef<HTMLInputElement>(null);
   const theme = useThemePref();
   const sample = useLiveQuery(hasSampleData, []);
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone;
+  const isStandalone = isNative() || window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   useEffect(() => setName(profile.name), [profile.name]);
@@ -44,7 +45,9 @@ export function Settings() {
     setBusy('export');
     try {
       const file = await exportBackup();
-      if (navigator.canShare?.({ files: [file] })) {
+      if (isNative()) {
+        await shareFileNative(file, file.name, 'OBSESSED backup').catch(() => {});
+      } else if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: 'OBSESSED backup' }).catch(() => {});
       } else {
         const url = URL.createObjectURL(file);

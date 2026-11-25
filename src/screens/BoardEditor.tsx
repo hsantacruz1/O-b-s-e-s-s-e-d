@@ -33,6 +33,7 @@ import { uid } from '../lib/ids';
 import { collectOrphanPhotos, savePhotos } from '../lib/images';
 import { BOARD_BACKGROUNDS, BOARD_BG_MAP, TEXT_COLORS, VISION_WORDS } from '../lib/presets';
 import { goBack, navigate, useBackToClose } from '../lib/router';
+import { isNative, shareFileNative } from '../lib/native';
 import { ui } from '../lib/ui';
 import type { Board, BoardItem, BoardTextItem, TextStyle } from '../lib/types';
 
@@ -661,12 +662,14 @@ function ExportSheet({ open, board, onClose }: { open: boolean; board: Board; on
 
   const filename = `${board.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'vision'}-obsessed.png`;
   const file = blob ? new File([blob], filename, { type: 'image/png' }) : null;
-  const canShare = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
+  const native = isNative();
+  const canShare = native || (!!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] }));
 
   const share = async () => {
-    if (!file) return;
+    if (!file || !blob) return;
     try {
-      await navigator.share({ files: [file], title: board.title });
+      if (native) await shareFileNative(blob, filename, board.title);
+      else await navigator.share({ files: [file], title: board.title });
     } catch {
       /* cancelled */
     }
@@ -692,9 +695,11 @@ function ExportSheet({ open, board, onClose }: { open: boolean; board: Board; on
               <Share2 size={16} strokeWidth={1.5} /> Save or share image
             </button>
           )}
-          <button className={`btn ${canShare ? 'btn--ghost' : 'btn--primary btn--big'} btn--block`} onClick={download} disabled={!blob}>
-            <Download size={16} strokeWidth={1.5} /> Download image
-          </button>
+          {!native && (
+            <button className={`btn ${canShare ? 'btn--ghost' : 'btn--primary btn--big'} btn--block`} onClick={download} disabled={!blob}>
+              <Download size={16} strokeWidth={1.5} /> Download image
+            </button>
+          )}
         </div>
       }
     >
@@ -703,7 +708,9 @@ function ExportSheet({ open, board, onClose }: { open: boolean; board: Board; on
       </div>
       {board.aspect === '9:19.5' && (
         <p className="muted small center">
-          On iPhone: Save Image, then in Photos choose Share, Use as Wallpaper. On Android: open the image and choose Set as wallpaper. You will see it each time you reach for your phone.
+          {native
+            ? 'Choose Save to gallery, then open the image and set it as your wallpaper. You will see it each time you reach for your phone.'
+            : 'On iPhone: Save Image, then in Photos choose Share, Use as Wallpaper. On Android: open the image and choose Set as wallpaper. You will see it each time you reach for your phone.'}
         </p>
       )}
     </Sheet>

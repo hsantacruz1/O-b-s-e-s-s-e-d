@@ -23,11 +23,19 @@ function isDark(pref: ThemePref): boolean {
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
 }
 
+// Only remove a data-theme we set ourselves; a host page may set its own.
+let owned = false;
+
 /** Apply the preference to <html> and the browser chrome color. */
 export function applyTheme(pref: ThemePref = current): void {
   const root = document.documentElement;
-  if (pref === 'system') delete root.dataset.theme;
-  else root.dataset.theme = pref;
+  if (pref === 'system') {
+    if (owned) delete root.dataset.theme;
+    owned = false;
+  } else {
+    root.dataset.theme = pref;
+    owned = true;
+  }
   const meta = document.querySelector('meta[name="theme-color"]');
   meta?.setAttribute('content', isDark(pref) ? '#121211' : '#F3F2EF');
 }
